@@ -4,7 +4,10 @@ module.exports = {
   rules: {},
   parser: '@babel/eslint-parser',
   parserOptions: {
-    requireConfigFile: false,
+    ecmaFeatures: {
+      jsx: true,
+    },
+    requireConfigFile: true,
     ecmaVersion: 2018,
     sourceType: 'module',
   },
