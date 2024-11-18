@@ -12,7 +12,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {LineChart} from 'react-native-chart-kit';
 import {Calendar} from 'react-native-calendars';
-import CustomDay from './CustomDay';
+import CustomDay from '../components/CustomDay';
 
 const screenWidth = Dimensions.get('window').width;
 
