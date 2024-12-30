@@ -1,24 +1,14 @@
+// src/screens/HomeScreen.js
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  TextInput,
-  ScrollView,
-  Dimensions,
-  Alert,
-} from 'react-native';
+import {View, StyleSheet, TouchableOpacity, Modal, Alert} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {LineChart} from 'react-native-chart-kit';
-import {Calendar} from 'react-native-calendars';
-import CustomDay from '../components/CustomDay';
-
-const screenWidth = Dimensions.get('window').width;
+import WeightCalendar from '../components/WeightCalendar';
+import DayWeightList from '../components/DayWeightList';
+import WeightPicker from '../components/WeightPicker';
 
 const HomeScreen = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [weight, setWeight] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [weightEntries, setWeightEntries] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
@@ -27,15 +17,6 @@ const HomeScreen = () => {
   useEffect(() => {
     loadWeightEntries();
   }, []);
-
-  useEffect(() => {
-    const entry = weightEntries.find(entry => entry.date === selectedDate);
-    if (entry) {
-      setWeight(entry.weight.toString());
-    } else {
-      setWeight('');
-    }
-  }, [selectedDate, weightEntries]);
 
   const loadWeightEntries = async () => {
     try {
@@ -56,292 +37,120 @@ const HomeScreen = () => {
     }
   };
 
-  const addWeightEntry = () => {
-    if (weight) {
-      const newEntry = {
-        date: selectedDate,
-        weight: parseFloat(weight),
-      };
-      const updatedEntries = [
-        ...weightEntries.filter(entry => entry.date !== selectedDate),
-        newEntry,
-      ].sort((a, b) => new Date(a.date) - new Date(b.date));
-      setWeightEntries(updatedEntries);
-      saveWeightEntries(updatedEntries);
-      setWeight('');
+  const handleWeightComplete = selectedWeight => {
+    const existingEntries = weightEntries.filter(
+      entry => entry.date === selectedDate,
+    );
+
+    if (existingEntries.length >= 5) {
+      Alert.alert('입력 제한', '하루에 최대 5개까지 기록할 수 있습니다.', [
+        {text: '확인'},
+      ]);
+      setIsModalVisible(false);
+      return;
     }
-  };
 
-  const clearWeightEntries = async () => {
-    Alert.alert(
-      'Clear All Entries',
-      'Are you sure you want to delete all weight entries?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem('weightEntries');
-              setWeightEntries([]);
-              console.log('Weight entries cleared successfully');
-            } catch (error) {
-              console.error('Failed to clear weight entries:', error);
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const validEntries = weightEntries.filter(entry => !isNaN(entry.weight));
-
-  const getChartData = () => {
-    const sortedEntries = [...weightEntries].sort(
-      (a, b) => new Date(a.date) - new Date(b.date),
-    );
-    const last7Entries = sortedEntries.slice(-7);
-    return {
-      labels: last7Entries.map(entry => entry.date.slice(5)),
-      datasets: [
-        {
-          data: last7Entries.map(entry => entry.weight),
-        },
-      ],
+    const newEntry = {
+      date: selectedDate,
+      weight: selectedWeight,
+      timestamp: new Date().getTime(),
     };
+
+    const updatedEntries = [...weightEntries, newEntry].sort(
+      (a, b) =>
+        new Date(a.date) - new Date(b.date) || b.timestamp - a.timestamp, // 같은 날짜면 최신 기록이 위로
+    );
+
+    setWeightEntries(updatedEntries);
+    saveWeightEntries(updatedEntries);
+    setIsModalVisible(false);
   };
 
-  const getStatistics = () => {
-    if (weightEntries.length === 0) return null;
-
-    const weights = weightEntries.map(entry => entry.weight);
-    const latestWeight = weights[weights.length - 1];
-    const averageWeight =
-      weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
-    const minWeight = Math.min(...weights);
-    const maxWeight = Math.max(...weights);
-
-    return {
-      latestWeight: latestWeight.toFixed(1),
-      averageWeight: averageWeight.toFixed(1),
-      minWeight: minWeight.toFixed(1),
-      maxWeight: maxWeight.toFixed(1),
-    };
-  };
-
-  const onDayPress = day => {
-    setSelectedDate(day.dateString);
-  };
-
-  const getMarkedDates = () => {
-    const markedDates = {};
-    weightEntries.forEach(entry => {
-      markedDates[entry.date] = {marked: true, dotColor: '#50cebb'};
-    });
-    return markedDates;
+  // 초기 체중값 계산 (오늘 날짜의 마지막 기록 또는 기본값)
+  const getInitialWeight = () => {
+    const todayEntries = weightEntries.filter(
+      entry => entry.date === selectedDate,
+    );
+    if (todayEntries.length > 0) {
+      return todayEntries[todayEntries.length - 1].weight;
+    }
+    return 67.5; // 기본값
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>WeightTrack</Text>
-      <Calendar
-        current={selectedDate}
-        onDayPress={onDayPress}
-        markedDates={{
-          ...getMarkedDates(),
-          [selectedDate]: {
-            selected: true,
-            marked: getMarkedDates()[selectedDate]?.marked,
-            selectedColor: '#50cebb',
-          },
-        }}
-        theme={{
-          selectedDayBackgroundColor: '#50cebb',
-          todayTextColor: '#00adf5',
-          arrowColor: '#50cebb',
-        }}
-        dayComponent={({date, state, marking, onPress}) => {
-          const dateString = date.dateString;
-
-          // Find weight entry for this date
-          const entry = weightEntries.find(entry => entry.date === dateString);
-          const weight = entry ? entry.weight : null;
-
-          return (
-            <CustomDay
-              date={date}
-              state={state}
-              marking={marking}
-              onPress={() => {
-                setSelectedDate(dateString);
-                onDayPress({dateString});
-              }}
-              weight={weight}
-            />
-          );
-        }}
+    <View style={styles.container}>
+      <WeightCalendar
+        onDayPress={day => setSelectedDate(day.dateString)}
+        selectedDate={selectedDate}
+        weightEntries={weightEntries}
       />
 
-      <View style={styles.selectedDateInfo}>
-        <Text style={styles.selectedDateText}>
-          Selected Date: {selectedDate}
-        </Text>
-        <View style={styles.weightInputContainer}>
-          <TextInput
-            style={styles.weightInput}
-            onChangeText={setWeight}
-            value={weight}
-            placeholder="Enter weight (kg)"
-            keyboardType="numeric"
-          />
-        </View>
-        <Button title="Add/Update" onPress={addWeightEntry} />
-      </View>
+      <DayWeightList
+        selectedDate={selectedDate}
+        weightEntries={weightEntries}
+      />
 
-      <View style={styles.clearButton}>
-        <Button
-          title="Clear All Entries"
-          onPress={clearWeightEntries}
-          color="red"
-        />
-      </View>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setIsModalVisible(true)}
+        activeOpacity={0.8}>
+        <Icon name="plus" size={24} color="white" />
+      </TouchableOpacity>
 
-      {weightEntries.length > 0 && (
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Weight Trend (Last 7 Entries)</Text>
-          <LineChart
-            data={getChartData()}
-            width={screenWidth - 40}
-            height={220}
-            yAxisSuffix=" kg"
-            chartConfig={{
-              backgroundColor: '#e26a00',
-              backgroundGradientFrom: '#fb8c00',
-              backgroundGradientTo: '#ffa726',
-              decimalPlaces: 1,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-              propsForDots: {
-                r: '6',
-                strokeWidth: '2',
-                stroke: '#ffa726',
-              },
-            }}
-            bezier
-            style={{
-              marginVertical: 8,
-              borderRadius: 16,
-            }}
-          />
-        </View>
-      )}
-
-      {getStatistics() && (
-        <View style={styles.statisticsContainer}>
-          <Text style={styles.statisticsTitle}>Statistics</Text>
-          <Text>Latest Weight: {getStatistics().latestWeight} kg</Text>
-          <Text>Average Weight: {getStatistics().averageWeight} kg</Text>
-          <Text>Minimum Weight: {getStatistics().minWeight} kg</Text>
-          <Text>Maximum Weight: {getStatistics().maxWeight} kg</Text>
-        </View>
-      )}
-
-      <View style={styles.entriesContainer}>
-        <Text style={styles.entriesTitle}>Weight Entries:</Text>
-        {weightEntries.map((entry, index) => (
-          <Text key={index}>
-            {entry.date}: {entry.weight} kg
-          </Text>
-        ))}
-      </View>
-    </ScrollView>
+      <Modal
+        visible={isModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setIsModalVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setIsModalVisible(false)}>
+          <View
+            style={styles.modalContent}
+            onStartShouldSetResponder={() => true}
+            onTouchEnd={e => e.stopPropagation()}>
+            <WeightPicker
+              initialWeight={getInitialWeight()}
+              onComplete={handleWeightComplete}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 10,
     backgroundColor: '#F5FCFF',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  clearButton: {
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  input: {
-    height: 40,
-    width: '70%',
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-  },
-  chartContainer: {
-    marginVertical: 20,
-  },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  entriesContainer: {
-    marginTop: 20,
-  },
-  entriesTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  selectedDateInfo: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  selectedDateText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  weightInputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#50cebb',
     alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-  weightInput: {
-    height: 40,
-    width: '70%',
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingHorizontal: 10,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'flex-end',
   },
-  statisticsContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  statisticsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  modalContent: {
+    width: '100%',
   },
 });
 
