@@ -1,7 +1,13 @@
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 
-const DayWeightList = ({selectedDate, weightEntries}) => {
+const DayWeightList = ({selectedDate, weightEntries, onEditPress}) => {
   const dayEntries = weightEntries
     .filter(entry => entry.date === selectedDate)
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -19,17 +25,18 @@ const DayWeightList = ({selectedDate, weightEntries}) => {
           <Text style={styles.headerText}>체중 (kg)</Text>
         </View>
         {dayEntries.map((entry, index) => (
-          <View
+          <TouchableOpacity
             key={index}
             style={[
               styles.row,
-              index % 2 === 0 ? styles.evenRow : styles.oddrow,
-            ]}>
+              index % 2 === 0 ? styles.evenRow : styles.oddRow,
+            ]}
+            onPress={() => onEditPress(entry)}>
             <Text style={styles.timeText}>
               {new Date(entry.timestamp).toLocaleTimeString()}
             </Text>
             <Text style={styles.weightText}>{entry.weight.toFixed(1)}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
@@ -51,7 +58,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  dateTitme: {
+  dateTitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,

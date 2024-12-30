@@ -13,6 +13,7 @@ const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
+  const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
     loadWeightEntries();
@@ -37,44 +38,64 @@ const HomeScreen = () => {
     }
   };
 
+  const handleEditPress = entry => {
+    setEditingEntry(entry);
+    setIsModalVisible(true);
+  };
+
   const handleWeightComplete = selectedWeight => {
-    const existingEntries = weightEntries.filter(
-      entry => entry.date === selectedDate,
-    );
+    if (editingEntry) {
+      // 수정 모드일 때
+      const updatedEntries = weightEntries.map(entry =>
+        entry.timestamp === editingEntry.timestamp
+          ? {...entry, weight: selectedWeight} // 체중만 업데이트
+          : entry,
+      );
 
-    if (existingEntries.length >= 5) {
-      Alert.alert('입력 제한', '하루에 최대 5개까지 기록할 수 있습니다.', [
-        {text: '확인'},
-      ]);
-      setIsModalVisible(false);
-      return;
+      setWeightEntries(updatedEntries);
+      saveWeightEntries(updatedEntries);
+      setEditingEntry(null);
+    } else {
+      const existingEntries = weightEntries.filter(
+        entry => entry.date === selectedDate,
+      );
+
+      if (existingEntries.length >= 5) {
+        Alert.alert('입력 제한', '하루에 최대 5개까지 기록할 수 있습니다.', [
+          {text: '확인'},
+        ]);
+        setIsModalVisible(false);
+        return;
+      }
+
+      const newEntry = {
+        date: selectedDate,
+        weight: selectedWeight,
+        timestamp: new Date().getTime(),
+      };
+
+      const updatedEntries = [...weightEntries, newEntry].sort(
+        (a, b) =>
+          new Date(a.date) - new Date(b.date) || b.timestamp - a.timestamp, // 같은 날짜면 최신 기록이 위로
+      );
+
+      setWeightEntries(updatedEntries);
+      saveWeightEntries(updatedEntries);
     }
-
-    const newEntry = {
-      date: selectedDate,
-      weight: selectedWeight,
-      timestamp: new Date().getTime(),
-    };
-
-    const updatedEntries = [...weightEntries, newEntry].sort(
-      (a, b) =>
-        new Date(a.date) - new Date(b.date) || b.timestamp - a.timestamp, // 같은 날짜면 최신 기록이 위로
-    );
-
-    setWeightEntries(updatedEntries);
-    saveWeightEntries(updatedEntries);
     setIsModalVisible(false);
   };
 
   // 초기 체중값 계산 (오늘 날짜의 마지막 기록 또는 기본값)
   const getInitialWeight = () => {
+    if (editingEntry) {
+      return editingEntry.weight;
+    }
     const todayEntries = weightEntries.filter(
       entry => entry.date === selectedDate,
     );
-    if (todayEntries.length > 0) {
-      return todayEntries[todayEntries.length - 1].weight;
-    }
-    return 67.5; // 기본값
+    return todayEntries.length > 0
+      ? todayEntries[todayEntries.length - 1].weight
+      : 67.5;
   };
 
   return (
@@ -88,11 +109,15 @@ const HomeScreen = () => {
       <DayWeightList
         selectedDate={selectedDate}
         weightEntries={weightEntries}
+        onEditPress={handleEditPress} // 수정을 위한 prop 추가
       />
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setIsModalVisible(true)}
+        onPress={() => {
+          setEditingEntry(null); // 새 기록 추가 시 editing 상태 초기화
+          setIsModalVisible(true);
+        }}
         activeOpacity={0.8}>
         <Icon name="plus" size={24} color="white" />
       </TouchableOpacity>
