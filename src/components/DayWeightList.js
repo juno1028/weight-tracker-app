@@ -1,11 +1,6 @@
+// src/components/DayWeightList.js
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 
 const DayWeightList = ({selectedDate, weightEntries, onEditPress}) => {
   const dayEntries = weightEntries
@@ -18,87 +13,55 @@ const DayWeightList = ({selectedDate, weightEntries, onEditPress}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.dateTitle}>{selectedDate} 기록</Text>
-      <ScrollView style={styles.scrollContainer}>
-        <View style={styles.headerRow}>
-          <Text style={styles.headerText}>시간</Text>
-          <Text style={styles.headerText}>체중 (kg)</Text>
-        </View>
-        {dayEntries.map((entry, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.row,
-              index % 2 === 0 ? styles.evenRow : styles.oddRow,
-            ]}
-            onPress={() => onEditPress(entry)}>
-            <Text style={styles.timeText}>
-              {new Date(entry.timestamp).toLocaleTimeString()}
-            </Text>
-            <Text style={styles.weightText}>{entry.weight.toFixed(1)}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {dayEntries.map((entry, index) => (
+        <TouchableOpacity
+          key={entry.timestamp}
+          style={[styles.entryRow, index !== 0 && styles.borderTop]}
+          onPress={() => onEditPress(entry)}>
+          <Text style={styles.timeText}>
+            {new Date(entry.timestamp).toLocaleTimeString()}
+          </Text>
+          <View style={styles.weightContainer}>
+            <Text style={styles.weightText}>{entry.weight.toFixed(1)}kg</Text>
+            {entry.case && <Text style={styles.caseText}>{entry.case}</Text>}
+          </View>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 15,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    paddingHorizontal: 16,
   },
-  dateTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
-  },
-  scrollContainer: {
-    maxHeight: 200,
-  },
-  headerRow: {
+  entryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    paddingVertical: 20,
+    alignItems: 'center',
+    columnGap: 24,
   },
-  headerText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 5,
-  },
-  evenRow: {
-    backgroundColor: '#f8f9fa',
-  },
-  oddRow: {
-    backgroundColor: 'white',
+  borderTop: {
+    borderTopWidth: 1,
+    borderTopColor: '#cce6e4',
   },
   timeText: {
     fontSize: 14,
-    color: '#666',
+    color: '#4a9691',
+    width: '20%',
+  },
+  weightContainer: {
+    flex: 1,
   },
   weightText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    color: '#0d1b1a',
+  },
+  caseText: {
+    fontSize: 12,
+    color: '#4a9691',
+    marginTop: 4,
   },
 });
 

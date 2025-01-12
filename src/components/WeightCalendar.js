@@ -1,62 +1,81 @@
+// src/components/WeightCalendar.js
 import React from 'react';
-import {View, StyleSheet, Dimensions} from 'react-native';
-import {CalendarList} from 'react-native-calendars';
+import {View, StyleSheet} from 'react-native';
+import {Calendar} from 'react-native-calendars';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomDay from './CustomDay';
 
 const WeightCalendar = ({onDayPress, selectedDate, weightEntries}) => {
   const getMarkedDates = () => {
     const markedDates = {};
     weightEntries.forEach(entry => {
-      markedDates[entry.date] = {marked: true, dotColor: '#50cebb'};
+      if (!markedDates[entry.date]) {
+        markedDates[entry.date] = {
+          marked: true,
+          weights: [entry.weight],
+        };
+      } else {
+        markedDates[entry.date].weights.push(entry.weight);
+      }
     });
+
+    if (selectedDate) {
+      markedDates[selectedDate] = {
+        ...(markedDates[selectedDate] || {}),
+        selected: true,
+      };
+    }
+
     return markedDates;
   };
 
   return (
-    <View style={styles.calendarContainer}>
-      <CalendarList
+    <View style={styles.container}>
+      <Calendar
         current={selectedDate}
         onDayPress={onDayPress}
-        markedDates={{
-          ...getMarkedDates(),
-          [selectedDate]: {
-            selected: true,
-            marked: getMarkedDates()[selectedDate]?.marked,
-            selectedColor: '#50cebb',
-          },
-        }}
-        theme={{
-          selectedDayBackgroundColor: '#50cebb',
-          todayTextColor: '#00adf5',
-          arrowColor: '$50cebb',
-        }}
-        // 달력 좌우 스크롤 관련 속성 추가
-        horizontal={true} // 가로 스크롤 활성화
-        pagingEnabled={true} // 페이지 단위로 스크롤
-        calendarWidth={Dimensions.get('window').width - 20} // 좌우 패딩 고려
-        pastScrollRange={50} // 과거 몇 개월까지 스크롤 가능한지
-        futureScrollRange={50} // 미래 몇 개월까지 스크롤 가능한지
-        scrollEnabled={true} // 스크롤 활성화
-        showScrollIndicator={false} // 스크롤 활성화
-        dayComponent={({date, state, marking, onPress}) => {
-          const dateString = date.dateString;
-          const entries = weightEntries.filter(
-            entry => entry.date === dateString,
-          );
-          const weights = entries.map(entry => entry.weight);
-
-          return (
-            <CustomDay
-              date={date}
-              state={state}
-              marking={marking}
-              onPress={() => {
-                onPress();
-                onDayPress({dateString});
-              }}
-              weights={weights}
+        markedDates={getMarkedDates()}
+        firstDay={0}
+        enableSwipeMonths={true}
+        renderArrow={direction => (
+          <View style={styles.arrowContainer}>
+            <Icon
+              name={direction === 'left' ? 'chevron-left' : 'chevron-right'}
+              size={18}
+              color="#0d1b1a"
             />
-          );
+          </View>
+        )}
+        dayComponent={({date, state, marking}) => (
+          <CustomDay
+            date={date}
+            state={state}
+            marking={marking}
+            onPress={() => onDayPress(date)}
+            weights={marking?.weights}
+          />
+        )}
+        theme={{
+          calendarBackground: '#f1f8f8',
+          monthTextColor: '#0d1b1a',
+          textMonthFontWeight: 'bold',
+          textMonthFontSize: 16,
+          textDayHeaderFontWeight: 'bold',
+          textDayHeaderFontSize: 13,
+          'stylesheet.calendar.header': {
+            header: {
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingHorizontal: 4,
+              paddingVertical: 4,
+            },
+            monthText: {
+              fontSize: 16,
+              fontWeight: 'bold',
+              color: '#0d1b1a',
+            },
+          },
         }}
       />
     </View>
@@ -64,18 +83,16 @@ const WeightCalendar = ({onDayPress, selectedDate, weightEntries}) => {
 };
 
 const styles = StyleSheet.create({
-  calendarContainer: {
-    backgroundColor: 'white',
-    borderRadius: 0,
-    padding: 0,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 3.84,
-    elevation: 5,
+  container: {
+    minWidth: 288,
+    maxWidth: 336,
+    flex: 1,
+  },
+  arrowContainer: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

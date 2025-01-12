@@ -1,11 +1,19 @@
 // src/screens/HomeScreen.js
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, TouchableOpacity, Modal, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeightCalendar from '../components/WeightCalendar';
 import DayWeightList from '../components/DayWeightList';
-import WeightPicker from '../components/WeightPicker';
+import WeightInputModal from '../components/Modal';
 
 const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,12 +51,16 @@ const HomeScreen = () => {
     setIsModalVisible(true);
   };
 
-  const handleWeightComplete = selectedWeight => {
+  const handleWeightComplete = (selectedWeight, selectedTime, selectedCase) => {
     if (editingEntry) {
-      // 수정 모드일 때
       const updatedEntries = weightEntries.map(entry =>
         entry.timestamp === editingEntry.timestamp
-          ? {...entry, weight: selectedWeight} // 체중만 업데이트
+          ? {
+              ...entry,
+              weight: selectedWeight,
+              timestamp: selectedTime.getTime(),
+              case: selectedCase,
+            }
           : entry,
       );
 
@@ -71,12 +83,13 @@ const HomeScreen = () => {
       const newEntry = {
         date: selectedDate,
         weight: selectedWeight,
-        timestamp: new Date().getTime(),
+        timestamp: selectedTime.getTime(),
+        case: selectedCase,
       };
 
       const updatedEntries = [...weightEntries, newEntry].sort(
         (a, b) =>
-          new Date(a.date) - new Date(b.date) || b.timestamp - a.timestamp, // 같은 날짜면 최신 기록이 위로
+          new Date(a.date) - new Date(b.date) || b.timestamp - a.timestamp,
       );
 
       setWeightEntries(updatedEntries);
@@ -85,7 +98,6 @@ const HomeScreen = () => {
     setIsModalVisible(false);
   };
 
-  // 초기 체중값 계산 (오늘 날짜의 마지막 기록 또는 기본값)
   const getInitialWeight = () => {
     if (editingEntry) {
       return editingEntry.weight;
@@ -98,69 +110,134 @@ const HomeScreen = () => {
       : 67.5;
   };
 
+  const onDayPress = day => {
+    setSelectedDate(day.dateString);
+  };
+
   return (
-    <View style={styles.container}>
-      <WeightCalendar
-        onDayPress={day => setSelectedDate(day.dateString)}
-        selectedDate={selectedDate}
-        weightEntries={weightEntries}
-      />
+    <View style={styles.safeArea}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.menuButton}>
+          <Icon name="menu" size={24} color="#0d1b1a" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Weight Tracker</Text>
+        <TouchableOpacity style={styles.settingsButton}>
+          <Icon name="cog" size={24} color="#0d1b1a" />
+        </TouchableOpacity>
+      </View>
 
-      <DayWeightList
-        selectedDate={selectedDate}
-        weightEntries={weightEntries}
-        onEditPress={handleEditPress} // 수정을 위한 prop 추가
-      />
+      <ScrollView style={styles.container}>
+        {/* Calendar Section */}
+        <View style={styles.calendarSection}>
+          <WeightCalendar
+            onDayPress={onDayPress}
+            selectedDate={selectedDate}
+            weightEntries={weightEntries}
+          />
+        </View>
 
+        {/* Weight List Section */}
+        <View style={styles.listSection}>
+          <Text style={styles.dateTitle}>{selectedDate} 기록</Text>
+          <DayWeightList
+            selectedDate={selectedDate}
+            weightEntries={weightEntries}
+            onEditPress={handleEditPress}
+          />
+        </View>
+      </ScrollView>
+
+      {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => {
-          setEditingEntry(null); // 새 기록 추가 시 editing 상태 초기화
+          setEditingEntry(null);
           setIsModalVisible(true);
         }}
         activeOpacity={0.8}>
-        <Icon name="plus" size={24} color="white" />
+        <Icon name="plus" size={24} color="#0d1b1a" />
+        <Text style={styles.fabText}>체중 기록</Text>
       </TouchableOpacity>
 
-      <Modal
-        visible={isModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setIsModalVisible(false)}>
-          <View
-            style={styles.modalContent}
-            onStartShouldSetResponder={() => true}
-            onTouchEnd={e => e.stopPropagation()}>
-            <WeightPicker
-              initialWeight={getInitialWeight()}
-              onComplete={handleWeightComplete}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <WeightInputModal
+        isVisible={isModalVisible}
+        onClose={() => {
+          setIsModalVisible(false);
+          setEditingEntry(null);
+        }}
+        onComplete={handleWeightComplete}
+        initialWeight={getInitialWeight()}
+        initialTime={
+          editingEntry ? new Date(editingEntry.timestamp) : new Date()
+        }
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f1f8f8',
+  },
   container: {
     flex: 1,
-    paddingVertical: 40,
-    paddingHorizontal: 10,
-    backgroundColor: '#F5FCFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f8f8',
+    padding: 16,
+    paddingTop: 44, // iOS status bar 높이
+    paddingBottom: 8,
+    justifyContent: 'space-between',
+  },
+  menuButton: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0d1b1a',
+    flex: 1,
+    textAlign: 'center',
+  },
+  settingsButton: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: '#f1f8f8',
+  },
+  listSection: {
+    flex: 1,
+    backgroundColor: '#f1f8f8',
+    paddingTop: 16,
+  },
+  dateTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#0d1b1a',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 20,
-    width: 56,
+    bottom: 90, // 탭바 위 여백
     height: 56,
+    paddingHorizontal: 24,
     borderRadius: 28,
-    backgroundColor: '#50cebb',
+    backgroundColor: '#4ecdc4',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
@@ -168,14 +245,12 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    gap: 8,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    width: '100%',
+  fabText: {
+    color: '#0d1b1a',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
