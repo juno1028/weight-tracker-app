@@ -5,118 +5,80 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   ScrollView,
   Dimensions,
   SafeAreaView,
 } from 'react-native';
-import {CandlestickChart, LineChart} from 'react-native-wagmi-charts';
-import DayWeightList from '../components/DayWeightList';
 import {useWeight} from '../contexts/WeightContext';
+import WeightChart from '../components/WeightChart';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const PERIODS = {
-  DAILY: 'daily',
-  WEEKLY: 'weekly',
-  MONTHLY: 'monthly',
-};
-
-const CANDLE_COLORS = {
-  positive: {
-    default: '#4ecdc4',
-    selected: '#50cebb',
-  },
-  negative: {
-    default: '#ffc2d1',
-    selected: '#ff9eb7',
-  },
+  WEEK: '7일',
+  MONTH: '1개월',
+  HALF_YEAR: '6개월',
+  YEAR: '1년',
 };
 
 const StatsScreen = () => {
   const {weightEntries} = useWeight();
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS.DAILY);
-  const [selectedCandle, setSelectedCandle] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS.WEEK);
+  const [selectedDay, setSelectedDay] = useState(null);
 
-  const candleData = useMemo(() => {
+  const chartData = useMemo(() => {
     if (!weightEntries.length) return [];
 
-    const groupedData = weightEntries.reduce((acc, entry) => {
-      const date = new Date(entry.date);
-      let key;
+    const now = new Date();
+    const periodStart = new Date();
 
-      switch (selectedPeriod) {
-        case PERIODS.WEEKLY:
-          date.setDate(date.getDate() - date.getDay());
-          key = date.toISOString().split('T')[0];
-          break;
-        case PERIODS.MONTHLY:
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-            2,
-            '0',
-          )}-01`;
-          break;
-        default:
-          key = entry.date;
-      }
+    // 선택된 기간에 따라 시작일 설정
+    switch (selectedPeriod) {
+      case PERIODS.WEEK:
+        periodStart.setDate(now.getDate() - 7);
+        break;
+      case PERIODS.MONTH:
+        periodStart.setMonth(now.getMonth() - 1);
+        break;
+      case PERIODS.HALF_YEAR:
+        periodStart.setMonth(now.getMonth() - 6);
+        break;
+      case PERIODS.YEAR:
+        periodStart.setFullYear(now.getFullYear() - 1);
+        break;
+    }
 
-      if (!acc[key]) {
-        acc[key] = {
+    // 기간 내의 데이터만 필터링
+    const filteredEntries = weightEntries.filter(
+      entry =>
+        new Date(entry.date) >= periodStart && new Date(entry.date) <= now,
+    );
+
+    const groupedData = filteredEntries.reduce((acc, entry) => {
+      if (!acc[entry.date]) {
+        acc[entry.date] = {
+          date: entry.date,
           weights: [],
-          timestamp: new Date(key).getTime(),
+          timestamps: [],
+          cases: [],
         };
       }
-      acc[key].weights.push(entry.weight);
+      acc[entry.date].weights.push(entry.weight);
+      acc[entry.date].timestamps.push(entry.timestamp);
+      acc[entry.date].cases.push(entry.case);
       return acc;
     }, {});
 
-    return Object.entries(groupedData)
-      .map(([date, data]) => ({
-        timestamp: data.timestamp,
-        open: data.weights[0],
-        high: Math.max(...data.weights),
-        low: Math.min(...data.weights),
-        close: data.weights[data.weights.length - 1],
-        rawData: data.weights,
-        date,
+    return Object.values(groupedData)
+      .map(day => ({
+        ...day,
+        average:
+          day.weights.reduce((sum, w) => sum + w, 0) / day.weights.length,
+        min: Math.min(...day.weights),
+        max: Math.max(...day.weights),
       }))
-      .sort((a, b) => a.timestamp - b.timestamp);
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [weightEntries, selectedPeriod]);
-
-  const maData = useMemo(() => {
-    const period = 7; // 7일 이동평균으로 변경
-    return candleData
-      .map((_, index) => {
-        if (index < period - 1) return null;
-        const slice = candleData.slice(index - period + 1, index + 1);
-        const average =
-          slice.reduce((sum, candle) => sum + candle.close, 0) / period;
-        return {
-          timestamp: candleData[index].timestamp,
-          value: average,
-        };
-      })
-      .filter(Boolean);
-  }, [candleData]);
-
-  const statsData = useMemo(() => {
-    if (!candleData.length) return null;
-
-    const weights = candleData.map(d => d.close);
-    const currentWeight = weights[weights.length - 1];
-    const previousWeight = weights[weights.length - 2] || currentWeight;
-    const minWeight = Math.min(...weights);
-    const maxWeight = Math.max(...weights);
-    const weightDiff = currentWeight - previousWeight;
-
-    return {
-      currentWeight,
-      previousWeight,
-      minWeight,
-      maxWeight,
-      weightDiff,
-    };
-  }, [candleData]);
 
   const formatDate = dateStr => {
     const date = new Date(dateStr);
@@ -148,92 +110,22 @@ const StatsScreen = () => {
                     selectedPeriod === period &&
                       styles.selectedPeriodButtonText,
                   ]}>
-                  {period === PERIODS.DAILY
-                    ? '일간'
-                    : period === PERIODS.WEEKLY
-                    ? '주간'
-                    : '월간'}
+                  {period}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Stats Summary */}
-        {statsData && (
-          <View style={styles.statsContainer}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>현재 체중</Text>
-                <Text style={styles.statValue}>
-                  {statsData.currentWeight.toFixed(1)}kg
-                </Text>
-                <View style={styles.diffContainer}>
-                  <Icon
-                    name={statsData.weightDiff > 0 ? 'arrow-up' : 'arrow-down'}
-                    size={16}
-                    color={statsData.weightDiff > 0 ? '#ff6b6b' : '#4ecdc4'}
-                  />
-                  <Text
-                    style={[
-                      styles.diffText,
-                      {color: statsData.weightDiff > 0 ? '#ff6b6b' : '#4ecdc4'},
-                    ]}>
-                    {Math.abs(statsData.weightDiff).toFixed(1)}kg
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.statsDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>최저/최고 체중</Text>
-                <View style={styles.minMaxContainer}>
-                  <Text style={styles.minMaxValue}>
-                    {statsData.minWeight.toFixed(1)}kg
-                  </Text>
-                  <Text style={styles.minMaxSeparator}>~</Text>
-                  <Text style={styles.minMaxValue}>
-                    {statsData.maxWeight.toFixed(1)}kg
-                  </Text>
-                </View>
-                <Text style={styles.rangeText}>
-                  범위: {(statsData.maxWeight - statsData.minWeight).toFixed(1)}
-                  kg
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
-
         {/* Chart */}
-        {candleData.length > 0 ? (
+        {chartData.length > 0 ? (
           <View style={styles.chartWrapper}>
-            <CandlestickChart.Provider data={candleData}>
-              <View>
-                <TouchableWithoutFeedback
-                  onPress={e => {
-                    // 터치한 x 좌표를 기준으로 가장 가까운 캔들을 찾습니다
-                    const touchX = e.nativeEvent.locationX;
-                    const chartWidth = SCREEN_WIDTH - 32 - 32; // 전체 너비에서 패딩 제외
-                    const indexPosition =
-                      (touchX / chartWidth) * (candleData.length - 1);
-                    const nearestIndex = Math.round(indexPosition);
-
-                    if (nearestIndex >= 0 && nearestIndex < candleData.length) {
-                      setSelectedCandle(candleData[nearestIndex]);
-                    }
-                  }}>
-                  <View>
-                    <CandlestickChart height={300}>
-                      <CandlestickChart.Candles />
-                      <LineChart.Path color="#FFB74D" width={2} data={maData} />
-                    </CandlestickChart>
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </CandlestickChart.Provider>
-            <Text style={styles.chartDescription}>
-              * 막대: 일일 체중 변화 범위 / 주황색 선: 7일 이동평균
-            </Text>
+            <WeightChart
+              data={chartData}
+              selectedDate={
+                selectedDay?.date || chartData[chartData.length - 1]?.date
+              }
+            />
           </View>
         ) : (
           <View style={styles.noDataContainer}>
@@ -244,11 +136,50 @@ const StatsScreen = () => {
           </View>
         )}
 
+        {/* Date Picker */}
+        <View style={styles.datePickerContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.datePickerContent}>
+            {chartData.map(point => (
+              <TouchableOpacity
+                key={point.date}
+                style={[
+                  styles.dateItem,
+                  selectedDay?.date === point.date && styles.selectedDateItem,
+                ]}
+                onPress={() => setSelectedDay(point)}>
+                <Text
+                  style={[
+                    styles.dateText,
+                    selectedDay?.date === point.date && styles.selectedDateText,
+                  ]}>
+                  {new Date(point.date).toLocaleDateString('ko-KR', {
+                    month: 'numeric',
+                    day: 'numeric',
+                  })}
+                </Text>
+                {point.weights.length > 0 && (
+                  <Text
+                    style={[
+                      styles.dateCount,
+                      selectedDay?.date === point.date &&
+                        styles.selectedDateCount,
+                    ]}>
+                    {point.weights.length}회
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Selected Day Details */}
-        {selectedCandle && (
+        {selectedDay && (
           <View style={styles.detailsContainer}>
             <Text style={styles.detailsTitle}>
-              {formatDate(selectedCandle.date)} 기록
+              {formatDate(selectedDay.date)} 기록
             </Text>
 
             {/* Raw Data Table */}
@@ -262,72 +193,37 @@ const StatsScreen = () => {
                 <Text style={[styles.tableHeaderCell, {flex: 1.5}]}>상태</Text>
               </View>
               <ScrollView style={styles.tableBody}>
-                {weightEntries
-                  .filter(entry => {
-                    const entryDate = new Date(entry.date);
-                    const selectedDate = new Date(selectedCandle.date);
-
-                    switch (selectedPeriod) {
-                      case PERIODS.WEEKLY:
-                        // 같은 주의 데이터
-                        const entryWeekStart = new Date(entryDate);
-                        entryWeekStart.setDate(
-                          entryDate.getDate() - entryDate.getDay(),
-                        );
-                        const selectedWeekStart = new Date(selectedDate);
-                        selectedWeekStart.setDate(
-                          selectedDate.getDate() - selectedDate.getDay(),
-                        );
-                        return (
-                          entryWeekStart.getTime() ===
-                          selectedWeekStart.getTime()
-                        );
-
-                      case PERIODS.MONTHLY:
-                        // 같은 월의 데이터
-                        return (
-                          entryDate.getFullYear() ===
-                            selectedDate.getFullYear() &&
-                          entryDate.getMonth() === selectedDate.getMonth()
-                        );
-
-                      default:
-                        // 같은 날의 데이터
-                        return entry.date === selectedCandle.date;
-                    }
-                  })
-                  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                  .map((entry, index) => (
-                    <View
-                      key={entry.timestamp}
-                      style={[
-                        styles.tableRow,
-                        index !== 0 && styles.tableBorder,
-                      ]}>
-                      <Text style={[styles.tableCell, {flex: 2}]}>
-                        {new Date(entry.date).toLocaleDateString('ko-KR')}
-                      </Text>
-                      <Text style={[styles.tableCell, {flex: 1}]}>
-                        {new Date(entry.timestamp).toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                        })}
-                      </Text>
-                      <Text style={[styles.tableCell, {flex: 1}]}>
-                        {entry.weight.toFixed(1)}
-                      </Text>
-                      <Text style={[styles.tableCell, {flex: 1.5}]}>
-                        {entry.case === 'empty_stomach'
-                          ? '공복'
-                          : entry.case === 'after_meal'
-                          ? '식후'
-                          : entry.case === 'after_workout'
-                          ? '운동 후'
-                          : '-'}
-                      </Text>
-                    </View>
-                  ))}
+                {selectedDay.timestamps.map((timestamp, index) => (
+                  <View
+                    key={timestamp}
+                    style={[
+                      styles.tableRow,
+                      index !== 0 && styles.tableBorder,
+                    ]}>
+                    <Text style={[styles.tableCell, {flex: 2}]}>
+                      {new Date(selectedDay.date).toLocaleDateString('ko-KR')}
+                    </Text>
+                    <Text style={[styles.tableCell, {flex: 1}]}>
+                      {new Date(timestamp).toLocaleTimeString('ko-KR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })}
+                    </Text>
+                    <Text style={[styles.tableCell, {flex: 1}]}>
+                      {selectedDay.weights[index].toFixed(1)}
+                    </Text>
+                    <Text style={[styles.tableCell, {flex: 1.5}]}>
+                      {selectedDay.cases[index] === 'empty_stomach'
+                        ? '공복'
+                        : selectedDay.cases[index] === 'after_meal'
+                        ? '식후'
+                        : selectedDay.cases[index] === 'after_workout'
+                        ? '운동 후'
+                        : '-'}
+                    </Text>
+                  </View>
+                ))}
               </ScrollView>
 
               {/* Summary Section */}
@@ -335,21 +231,19 @@ const StatsScreen = () => {
                 <View style={styles.summaryItem}>
                   <Text style={styles.summaryLabel}>평균</Text>
                   <Text style={styles.summaryValue}>
-                    {selectedCandle.rawData.reduce((a, b) => a + b, 0) /
-                      selectedCandle.rawData.length}
-                    kg
+                    {selectedDay.average.toFixed(1)}kg
                   </Text>
                 </View>
                 <View style={styles.summaryItem}>
                   <Text style={styles.summaryLabel}>최소</Text>
                   <Text style={styles.summaryValue}>
-                    {selectedCandle.low}kg
+                    {selectedDay.min.toFixed(1)}kg
                   </Text>
                 </View>
                 <View style={styles.summaryItem}>
                   <Text style={styles.summaryLabel}>최대</Text>
                   <Text style={styles.summaryValue}>
-                    {selectedCandle.high}kg
+                    {selectedDay.max.toFixed(1)}kg
                   </Text>
                 </View>
               </View>
@@ -404,71 +298,8 @@ const styles = StyleSheet.create({
   selectedPeriodButtonText: {
     color: '#fff',
   },
-  statsContainer: {
-    margin: 16,
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statItem: {
-    flex: 1,
-  },
-  statsDivider: {
-    width: 1,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 16,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0d1b1a',
-  },
-  diffContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  diffText: {
-    fontSize: 14,
-    marginLeft: 4,
-  },
-  minMaxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  minMaxValue: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0d1b1a',
-  },
-  minMaxSeparator: {
-    fontSize: 18,
-    color: '#666',
-    marginHorizontal: 8,
-  },
-  rangeText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
   chartWrapper: {
     margin: 16,
-    padding: 16,
     backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
@@ -477,11 +308,47 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  chartDescription: {
-    fontSize: 12,
+  datePickerContainer: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  datePickerContent: {
+    paddingHorizontal: 4,
+  },
+  dateItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  selectedDateItem: {
+    backgroundColor: '#4ecdc4',
+  },
+  dateText: {
+    fontSize: 14,
     color: '#666',
-    marginTop: 12,
-    textAlign: 'center',
+  },
+  selectedDateText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  dateCount: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
+  },
+  selectedDateCount: {
+    color: '#fff',
   },
   noDataContainer: {
     padding: 48,
