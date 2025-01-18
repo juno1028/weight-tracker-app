@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeightCalendar from '../components/WeightCalendar';
 import DayWeightList from '../components/DayWeightList';
@@ -143,7 +144,7 @@ const HomeScreen = () => {
           setIsModalVisible(true);
         }}
         activeOpacity={0.8}>
-        <Text style={styles.fabText}>체중 기록</Text>
+        <Icon name="plus" size={24} color="#ffffff" />
       </TouchableOpacity>
 
       <WeightInputModal
@@ -191,9 +192,9 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 32, // 탭바 위 여백 수정
+    bottom: 32,
+    width: 56,
     height: 56,
-    paddingHorizontal: 24,
     borderRadius: 28,
     backgroundColor: '#4ecdc4',
     alignItems: 'center',
@@ -203,11 +204,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-  },
-  fabText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 

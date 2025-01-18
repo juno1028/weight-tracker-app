@@ -6,7 +6,7 @@ export const COLORS = {
   primary: '#50cebb',
   white: '#ffffff',
   separator: 'rgba(255,255,255,0.1)',
-  indicator: 'rgba(255, 149, 0, 1)',
+  indicator: 'rgba(255, 149, 0, 0.5)',
 };
 
 export const COMMON_STYLES = {

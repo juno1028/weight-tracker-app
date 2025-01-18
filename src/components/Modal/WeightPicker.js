@@ -32,9 +32,6 @@ const WeightPicker = ({selectedWeight, onWeightChange}) => {
 };
 
 const styles = StyleSheet.create({
-  weightPicker: {
-    height: DIMENSIONS.pickerHeight,
-  },
   centerIndicator: {
     position: 'absolute',
     top: '50%',
