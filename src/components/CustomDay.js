@@ -2,6 +2,18 @@
 import React from 'react';
 import {TouchableOpacity, Text, View, StyleSheet} from 'react-native';
 
+const getStatusColor = weightCase => {
+  switch (weightCase) {
+    case 'empty_stomach':
+      return 'rgba(78, 205, 196, 0.15)'; // 민트색
+    case 'after_meal':
+      return 'rgba(255, 155, 155, 0.15)'; // 연한 빨강
+    case 'after_workout':
+      return 'rgba(255, 183, 77, 0.15)'; // 연한 주황
+    default:
+      return 'rgba(200, 200, 200, 0.15)'; // 연한 회색
+  }
+};
 const CustomDay = ({date, state, marking, onPress, weights}) => {
   const isSelected = marking?.selected;
   const isToday = state === 'today';
@@ -26,10 +38,31 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
           ]}>
           {date.day}
         </Text>
-        {hasWeights && weights.length > 0 && (
-          <Text style={styles.weightText}>
-            {weights[weights.length - 1].toFixed(1)}
-          </Text>
+        {hasWeights && (
+          <View style={styles.weightsContainer}>
+            {weights.slice(0, 3).map((weight, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.weightBox,
+                  {backgroundColor: getStatusColor(weight.case)},
+                ]}>
+                <Text
+                  style={[
+                    styles.weightText,
+                    isSelected && styles.selectedDayText,
+                  ]}>
+                  {weight.weight.toFixed(1)}
+                </Text>
+              </View>
+            ))}
+            {weights.length > 3 && (
+              <Text
+                style={[styles.moreText, isSelected && styles.selectedDayText]}>
+                +{weights.length - 3}
+              </Text>
+            )}
+          </View>
         )}
       </View>
     </TouchableOpacity>
@@ -38,20 +71,20 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 48,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1,
+    minHeight: 85, // 높이 증가
+    padding: 2,
   },
   dayContainer: {
-    width: 36,
-    height: 45,
+    flex: 1,
     alignItems: 'center',
-    paddingTop: 4,
     borderRadius: 4,
+    paddingVertical: 4,
   },
   selectedDayContainer: {
     backgroundColor: '#4ecdc4',
+    width: '100%',
+    height: '100%',
   },
   todayContainer: {
     borderWidth: 1,
@@ -61,7 +94,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#0d1b1a',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   disabledText: {
     color: '#99a3a2',
@@ -70,9 +103,25 @@ const styles = StyleSheet.create({
     color: '#0d1b1a',
     fontWeight: '600',
   },
+  weightsContainer: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 2,
+  },
+  weightBox: {
+    width: '100%',
+    paddingVertical: 2,
+    borderRadius: 3,
+    alignItems: 'center',
+  },
   weightText: {
+    fontSize: 10,
+    color: '#0d1b1a',
+  },
+  moreText: {
     fontSize: 9,
-    color: '#4a9691',
+    color: '#666',
     marginTop: 1,
   },
 });

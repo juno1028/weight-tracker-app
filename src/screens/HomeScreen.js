@@ -5,11 +5,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Modal,
   Alert,
   ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeightCalendar from '../components/WeightCalendar';
 import DayWeightList from '../components/DayWeightList';
@@ -116,17 +114,6 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton}>
-          <Icon name="menu" size={24} color="#0d1b1a" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Weight Tracker</Text>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Icon name="cog" size={24} color="#0d1b1a" />
-        </TouchableOpacity>
-      </View>
-
       <ScrollView style={styles.container}>
         {/* Calendar Section */}
         <View style={styles.calendarSection}>
@@ -156,7 +143,6 @@ const HomeScreen = () => {
           setIsModalVisible(true);
         }}
         activeOpacity={0.8}>
-        <Icon name="plus" size={24} color="#0d1b1a" />
         <Text style={styles.fabText}>체중 기록</Text>
       </TouchableOpacity>
 
@@ -184,38 +170,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f1f8f8',
-    padding: 16,
-    paddingTop: 44, // iOS status bar 높이
-    paddingBottom: 8,
-    justifyContent: 'space-between',
-  },
-  menuButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0d1b1a',
-    flex: 1,
-    textAlign: 'center',
-  },
-  settingsButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   calendarSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
     backgroundColor: '#f1f8f8',
+    paddingTop: 60,
+    width: '100%',
+    alignItems: 'center',
   },
   listSection: {
     flex: 1,
@@ -232,12 +191,11 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 90, // 탭바 위 여백
+    bottom: 32, // 탭바 위 여백 수정
     height: 56,
     paddingHorizontal: 24,
     borderRadius: 28,
     backgroundColor: '#4ecdc4',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
@@ -245,10 +203,9 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    gap: 8,
   },
   fabText: {
-    color: '#0d1b1a',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },
