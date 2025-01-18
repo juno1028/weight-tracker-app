@@ -4,6 +4,7 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
+  Text,
   Alert,
   ScrollView,
 } from 'react-native';
@@ -20,6 +21,41 @@ const HomeScreen = () => {
     new Date().toISOString().split('T')[0],
   );
   const [editingEntry, setEditingEntry] = useState(null);
+  const [initialModalWeight, setInitialModalWeight] = useState(67.5);
+
+  const handleAddPress = () => {
+    const selectedDateTime = new Date(selectedDate);
+    const today = new Date();
+    selectedDateTime.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDateTime > today) {
+      Alert.alert(
+        '날짜 확인',
+        '혹시 미래에서 오셨나요? 😅\n오늘 이후의 날짜는 입력할 수 없습니다.',
+      );
+      return;
+    }
+
+    const sortedEntries = [...weightEntries].sort(
+      (a, b) =>
+        new Date(b.date) - new Date(a.date) || b.timestamp - a.timestamp,
+    );
+    const initialWeight =
+      sortedEntries.length > 0 ? sortedEntries[0].weight : 67.5;
+
+    setEditingEntry(null);
+    setIsModalVisible(true);
+    setInitialModalWeight(initialWeight);
+  };
+
+  const handleDeleteEntry = async entry => {
+    const updatedEntries = weightEntries.filter(
+      item => item.timestamp !== entry.timestamp,
+    );
+    setWeightEntries(updatedEntries);
+    setIsModalVisible(false);
+  };
 
   const handleEditPress = entry => {
     setEditingEntry(entry);
@@ -71,18 +107,6 @@ const HomeScreen = () => {
     setIsModalVisible(false);
   };
 
-  const getInitialWeight = () => {
-    if (editingEntry) {
-      return editingEntry.weight;
-    }
-    const todayEntries = weightEntries.filter(
-      entry => entry.date === selectedDate,
-    );
-    return todayEntries.length > 0
-      ? todayEntries[todayEntries.length - 1].weight
-      : 67.5;
-  };
-
   const onDayPress = day => {
     setSelectedDate(day.dateString);
   };
@@ -92,6 +116,7 @@ const HomeScreen = () => {
       <ScrollView style={styles.container}>
         {/* Calendar Section */}
         <View style={styles.calendarSection}>
+          <Text style={styles.headerTitle}>체중 캘린더</Text>
           <WeightCalendar
             onDayPress={onDayPress}
             selectedDate={selectedDate}
@@ -109,17 +134,6 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          setEditingEntry(null);
-          setIsModalVisible(true);
-        }}
-        activeOpacity={0.8}>
-        <Icon name="plus" size={24} color="#ffffff" />
-      </TouchableOpacity>
-
       <WeightInputModal
         isVisible={isModalVisible}
         onClose={() => {
@@ -127,11 +141,21 @@ const HomeScreen = () => {
           setEditingEntry(null);
         }}
         onComplete={handleWeightComplete}
-        initialWeight={getInitialWeight()}
+        onDelete={handleDeleteEntry}
+        editingEntry={editingEntry}
+        initialWeight={initialModalWeight}
         initialTime={
           editingEntry ? new Date(editingEntry.timestamp) : new Date()
         }
       />
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={handleAddPress}
+        activeOpacity={0.8}>
+        <Icon name="plus" size={24} color="#ffffff" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -148,7 +172,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f8f8',
     paddingTop: 60,
     width: '100%',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#0d1b1a',
+    marginVertical: 10,
+    paddingLeft: 20,
   },
   listSection: {
     flex: 1,

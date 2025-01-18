@@ -1,6 +1,13 @@
 // src/components/Modal/index.js
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, Modal, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import TimePicker from './TimePicker';
 import WeightPicker from './WeightPicker';
 import WeightCase from './WeightCase';
@@ -11,6 +18,8 @@ const WeightInputModal = ({
   isVisible,
   onClose,
   onComplete,
+  onDelete,
+  editingEntry,
   initialWeight = 67.5,
   initialTime = new Date(),
 }) => {
@@ -86,11 +95,40 @@ const WeightInputModal = ({
             onSelectCase={setSelectedCase}
           />
 
-          <TouchableOpacity
-            style={styles.completeButton}
-            onPress={handleComplete}>
-            <Text style={styles.completeButtonText}>완료</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            {editingEntry && (
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => {
+                  Alert.alert(
+                    '삭제 확인',
+                    '정말 삭제하시겠습니까?',
+                    [
+                      {
+                        text: '취소',
+                        style: 'cancel',
+                      },
+                      {
+                        text: '삭제',
+                        onPress: () => onDelete?.(editingEntry),
+                        style: 'destructive',
+                      },
+                    ],
+                    {cancelable: false},
+                  );
+                }}>
+                <Text style={styles.deleteButtonText}>삭제</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[
+                styles.completeButton,
+                !editingEntry && styles.completeButtonFullWidth,
+              ]}
+              onPress={handleComplete}>
+              <Text style={styles.completeButtonText}>완료</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
     </Modal>
@@ -131,11 +169,31 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.separator,
     marginVertical: 10,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 20,
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 15,
+    borderRadius: 10,
+  },
+  deleteButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   completeButton: {
+    flex: 2,
     backgroundColor: COLORS.white,
     paddingVertical: 15,
     borderRadius: 10,
-    marginTop: 20,
+  },
+  completeButtonFullWidth: {
+    flex: 1,
   },
   completeButtonText: {
     color: COLORS.primary,

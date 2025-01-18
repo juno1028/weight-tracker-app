@@ -4,6 +4,19 @@ import {COLORS} from './styles';
 import {WEIGHT_CASES} from './constants';
 
 const WeightCase = ({selectedCase, onSelectCase}) => {
+  const getBackgroundColor = caseId => {
+    switch (caseId) {
+      case 'empty_stomach':
+        return 'rgba(78, 205, 196, 0.15)';
+      case 'after_meal':
+        return 'rgba(255, 155, 155, 0.15)';
+      case 'after_workout':
+        return 'rgba(255, 183, 77, 0.15)';
+      default:
+        return 'rgba(200, 200, 200, 0.15)';
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonsContainer}>
@@ -12,6 +25,7 @@ const WeightCase = ({selectedCase, onSelectCase}) => {
             key={caseItem.id}
             style={[
               styles.button,
+              {backgroundColor: getBackgroundColor(caseItem.id)},
               selectedCase === caseItem.id && styles.selectedButton,
             ]}
             onPress={() => onSelectCase(caseItem.id)}>

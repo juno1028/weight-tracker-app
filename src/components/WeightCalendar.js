@@ -40,8 +40,8 @@ const WeightCalendar = ({onDayPress, selectedDate, weightEntries}) => {
         horizontal={true}
         pagingEnabled={true}
         calendarWidth={screenWidth} // 달력 너비 설정
-        pastScrollRange={60}
-        futureScrollRange={60}
+        pastScrollRange={24}
+        futureScrollRange={24}
         style={{
           backgroundColor: 'white',
           borderRadius: 12,
@@ -119,7 +119,6 @@ const WeightCalendar = ({onDayPress, selectedDate, weightEntries}) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    // paddingHorizontal: 16,
   },
   arrowContainer: {
     width: 40,
