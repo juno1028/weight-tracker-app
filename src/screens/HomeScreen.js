@@ -1,49 +1,25 @@
 // src/screens/HomeScreen.js
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeightCalendar from '../components/WeightCalendar';
 import DayWeightList from '../components/DayWeightList';
 import WeightInputModal from '../components/Modal';
+import {useWeight} from '../contexts/WeightContext';
 
 const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [weightEntries, setWeightEntries] = useState([]);
+  const {weightEntries, setWeightEntries} = useWeight();
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
   const [editingEntry, setEditingEntry] = useState(null);
-
-  useEffect(() => {
-    loadWeightEntries();
-  }, []);
-
-  const loadWeightEntries = async () => {
-    try {
-      const storedEntries = await AsyncStorage.getItem('weightEntries');
-      if (storedEntries !== null) {
-        setWeightEntries(JSON.parse(storedEntries));
-      }
-    } catch (error) {
-      console.error('Failed to load weight entries:', error);
-    }
-  };
-
-  const saveWeightEntries = async entries => {
-    try {
-      await AsyncStorage.setItem('weightEntries', JSON.stringify(entries));
-    } catch (error) {
-      console.error('Failed to save weight entries:', error);
-    }
-  };
 
   const handleEditPress = entry => {
     setEditingEntry(entry);
@@ -64,7 +40,6 @@ const HomeScreen = () => {
       );
 
       setWeightEntries(updatedEntries);
-      saveWeightEntries(updatedEntries);
       setEditingEntry(null);
     } else {
       const existingEntries = weightEntries.filter(
@@ -92,7 +67,6 @@ const HomeScreen = () => {
       );
 
       setWeightEntries(updatedEntries);
-      saveWeightEntries(updatedEntries);
     }
     setIsModalVisible(false);
   };
@@ -127,7 +101,6 @@ const HomeScreen = () => {
 
         {/* Weight List Section */}
         <View style={styles.listSection}>
-          <Text style={styles.dateTitle}>{selectedDate} 기록</Text>
           <DayWeightList
             selectedDate={selectedDate}
             weightEntries={weightEntries}
@@ -181,13 +154,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f1f8f8',
     paddingTop: 16,
-  },
-  dateTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0d1b1a',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
   },
   fab: {
     position: 'absolute',

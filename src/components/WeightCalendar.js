@@ -54,7 +54,6 @@ const WeightCalendar = ({onDayPress, selectedDate, weightEntries}) => {
         onDayPress={onDayPress}
         markedDates={getMarkedDates()}
         firstDay={0}
-        // enableSwipeMonths={true}
         // scrollEnabled 속성은 horizontal + pagingEnabled 설정 시 기본적으로 작동합니다.
         renderArrow={direction => (
           <View style={styles.arrowContainer}>

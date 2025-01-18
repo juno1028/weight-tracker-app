@@ -22,8 +22,22 @@ export const WeightProvider = ({children}) => {
     }
   };
 
+  const saveWeightEntries = async entries => {
+    try {
+      await AsyncStorage.setItem('weightEntries', JSON.stringify(entries));
+      setWeightEntries(entries); // 저장 후 상태 업데이트
+    } catch (error) {
+      console.error('Failed to save weight entries:', error);
+    }
+  };
+
   return (
-    <WeightContext.Provider value={{weightEntries, setWeightEntries}}>
+    <WeightContext.Provider
+      value={{
+        weightEntries,
+        setWeightEntries: saveWeightEntries,
+        loadWeightEntries,
+      }}>
       {children}
     </WeightContext.Provider>
   );
