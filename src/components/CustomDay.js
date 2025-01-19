@@ -38,6 +38,15 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
           ]}>
           {date.day}
         </Text>
+
+        {/* 3개 초과하는 기록이 있을 경우에만 +N 뱃지 표시 */}
+        {hasWeights && weights.length > 3 && (
+          <View style={styles.countBadge}>
+            <Text style={styles.countText}>+{weights.length - 3}</Text>
+          </View>
+        )}
+
+        {/* 체중 기록 목록 */}
         {hasWeights && (
           <View style={styles.weightsContainer}>
             {weights.slice(0, 3).map((weight, index) => (
@@ -56,12 +65,6 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
                 </Text>
               </View>
             ))}
-            {weights.length > 3 && (
-              <Text
-                style={[styles.moreText, isSelected && styles.selectedDayText]}>
-                +{weights.length - 3}
-              </Text>
-            )}
           </View>
         )}
       </View>
@@ -72,7 +75,7 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    minHeight: 85, // 높이 증가
+    minHeight: 70,
     padding: 2,
   },
   dayContainer: {
@@ -91,10 +94,10 @@ const styles = StyleSheet.create({
     borderColor: '#4ecdc4',
   },
   dayText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: '#0d1b1a',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   disabledText: {
     color: '#99a3a2',
@@ -106,23 +109,36 @@ const styles = StyleSheet.create({
   weightsContainer: {
     width: '100%',
     alignItems: 'center',
-    gap: 2,
+    gap: 1,
     paddingHorizontal: 2,
+    paddingTop: 1,
   },
   weightBox: {
     width: '100%',
-    paddingVertical: 2,
-    borderRadius: 3,
+    paddingVertical: 1,
+    borderRadius: 2,
     alignItems: 'center',
   },
   weightText: {
     fontSize: 10,
     color: '#0d1b1a',
   },
-  moreText: {
-    fontSize: 9,
-    color: '#666',
-    marginTop: 1,
+  countBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: 'rgba(78, 205, 196, 0.8)',
+    borderRadius: 6,
+    minWidth: 12,
+    height: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 2,
+  },
+  countText: {
+    fontSize: 8,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 
