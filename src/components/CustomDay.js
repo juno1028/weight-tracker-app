@@ -75,7 +75,8 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    minHeight: 70,
+    width: '100%',
+    minHeight: 75,
     padding: 2,
   },
   dayContainer: {

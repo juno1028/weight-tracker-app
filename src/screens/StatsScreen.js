@@ -1,4 +1,3 @@
-// src/screens/StatsScreen.js
 import React, {useState, useMemo} from 'react';
 import {
   View,
@@ -12,6 +11,7 @@ import {
 import {useWeight} from '../contexts/WeightContext';
 import WeightChart from '../components/WeightChart';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {WEIGHT_CASES} from '../components/Modal/constants';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const PERIODS = {
@@ -25,6 +25,9 @@ const StatsScreen = () => {
   const {weightEntries} = useWeight();
   const [selectedPeriod, setSelectedPeriod] = useState(PERIODS.WEEK);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [visibleCases, setVisibleCases] = useState(
+    Object.values(WEIGHT_CASES).map(c => c.id),
+  );
 
   const chartData = useMemo(() => {
     if (!weightEntries.length) return [];
@@ -32,7 +35,6 @@ const StatsScreen = () => {
     const now = new Date();
     const periodStart = new Date();
 
-    // 선택된 기간에 따라 시작일 설정
     switch (selectedPeriod) {
       case PERIODS.WEEK:
         periodStart.setDate(now.getDate() - 7);
@@ -48,7 +50,6 @@ const StatsScreen = () => {
         break;
     }
 
-    // 기간 내의 데이터만 필터링
     const filteredEntries = weightEntries.filter(
       entry =>
         new Date(entry.date) >= periodStart && new Date(entry.date) <= now,
@@ -70,15 +71,56 @@ const StatsScreen = () => {
     }, {});
 
     return Object.values(groupedData)
-      .map(day => ({
-        ...day,
-        average:
-          day.weights.reduce((sum, w) => sum + w, 0) / day.weights.length,
-        min: Math.min(...day.weights),
-        max: Math.max(...day.weights),
-      }))
+      .map(day => {
+        // 선택된 케이스의 데이터만 필터링하여 평균 계산
+        const filteredWeights = day.weights.filter((_, index) =>
+          visibleCases.includes(day.cases[index]),
+        );
+
+        return {
+          ...day,
+          average: filteredWeights.length
+            ? filteredWeights.reduce((sum, w) => sum + w, 0) /
+              filteredWeights.length
+            : 0,
+          min: Math.min(...day.weights),
+          max: Math.max(...day.weights),
+        };
+      })
       .sort((a, b) => new Date(a.date) - new Date(b.date));
-  }, [weightEntries, selectedPeriod]);
+  }, [weightEntries, selectedPeriod, visibleCases]); // visibleCases 의존성 추가
+
+  const toggleCase = caseId => {
+    setVisibleCases(prev => {
+      if (prev.includes(caseId)) {
+        if (prev.length === 1) return prev;
+        return prev.filter(id => id !== caseId);
+      }
+      return [...prev, caseId];
+    });
+  };
+
+  const getFilterBackgroundColor = caseId => {
+    const isActive = visibleCases.includes(caseId);
+    switch (caseId) {
+      case 'empty_stomach':
+        return isActive
+          ? 'rgba(78, 205, 196, 0.15)'
+          : 'rgba(78, 205, 196, 0.05)';
+      case 'after_meal':
+        return isActive
+          ? 'rgba(255, 155, 155, 0.15)'
+          : 'rgba(255, 155, 155, 0.05)';
+      case 'after_workout':
+        return isActive
+          ? 'rgba(255, 183, 77, 0.15)'
+          : 'rgba(255, 183, 77, 0.05)';
+      default:
+        return isActive
+          ? 'rgba(200, 200, 200, 0.15)'
+          : 'rgba(200, 200, 200, 0.05)';
+    }
+  };
 
   const formatDate = dateStr => {
     const date = new Date(dateStr);
@@ -87,6 +129,10 @@ const StatsScreen = () => {
       day: 'numeric',
       weekday: 'long',
     });
+  };
+
+  const onDaySelect = day => {
+    setSelectedDay(chartData.find(d => d.date === day));
   };
 
   return (
@@ -119,13 +165,44 @@ const StatsScreen = () => {
 
         {/* Chart */}
         {chartData.length > 0 ? (
-          <View style={styles.chartWrapper}>
-            <WeightChart
-              data={chartData}
-              selectedDate={
-                selectedDay?.date || chartData[chartData.length - 1]?.date
-              }
-            />
+          <View style={styles.chartContainer}>
+            <View style={styles.chartWrapper}>
+              <WeightChart
+                data={chartData}
+                selectedDate={selectedDay?.date}
+                visibleCases={visibleCases}
+              />
+            </View>
+
+            {/* Case Filter Buttons */}
+            <View style={styles.filterContainer}>
+              <View style={styles.filterRow}>
+                {Object.values(WEIGHT_CASES).map(caseItem => (
+                  <TouchableOpacity
+                    key={caseItem.id}
+                    style={[
+                      styles.filterButton,
+                      {
+                        backgroundColor: getFilterBackgroundColor(caseItem.id),
+                        borderColor: visibleCases.includes(caseItem.id)
+                          ? '#666666'
+                          : '#e0e0e0',
+                      },
+                    ]}
+                    onPress={() => toggleCase(caseItem.id)}
+                    activeOpacity={0.7}>
+                    <Text
+                      style={[
+                        styles.filterText,
+                        !visibleCases.includes(caseItem.id) &&
+                          styles.inactiveFilterText,
+                      ]}>
+                      {caseItem.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
           </View>
         ) : (
           <View style={styles.noDataContainer}>
@@ -149,7 +226,7 @@ const StatsScreen = () => {
                   styles.dateItem,
                   selectedDay?.date === point.date && styles.selectedDateItem,
                 ]}
-                onPress={() => setSelectedDay(point)}>
+                onPress={() => onDaySelect(point.date)}>
                 <Text
                   style={[
                     styles.dateText,
@@ -298,7 +375,7 @@ const styles = StyleSheet.create({
   selectedPeriodButtonText: {
     color: '#fff',
   },
-  chartWrapper: {
+  chartContainer: {
     margin: 16,
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -308,8 +385,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  chartWrapper: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+  },
   datePickerContainer: {
-    marginTop: 16,
+    marginVertical: 16,
     marginHorizontal: 16,
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -324,7 +406,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   dateItem: {
-    paddingHorizontal: 16,
+    width: 80, // 고정 너비 설정
     paddingVertical: 8,
     marginHorizontal: 4,
     borderRadius: 8,
@@ -349,6 +431,34 @@ const styles = StyleSheet.create({
   },
   selectedDateCount: {
     color: '#fff',
+  },
+  filterContainer: {
+    padding: 12,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  filterButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+  },
+  inactiveFilterText: {
+    color: '#999',
   },
   noDataContainer: {
     padding: 48,
