@@ -1,4 +1,3 @@
-// src/screens/HomeScreen.js
 import React, {useState} from 'react';
 import {
   View,
@@ -7,21 +6,38 @@ import {
   Text,
   Alert,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WeightCalendar from '../components/WeightCalendar';
 import DayWeightList from '../components/DayWeightList';
 import WeightInputModal from '../components/Modal';
 import {useWeight} from '../contexts/WeightContext';
+import {useUser} from '../contexts/UserContext';
 
 const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const {weightEntries, setWeightEntries} = useWeight();
+  const {weight: userWeight, updateUserData} = useUser();
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
   const [editingEntry, setEditingEntry] = useState(null);
   const [initialModalWeight, setInitialModalWeight] = useState(67.5);
+
+  const getInitialWeight = () => {
+    if (editingEntry) return editingEntry.weight;
+
+    if (weightEntries.length > 0) {
+      const sortedEntries = [...weightEntries].sort(
+        (a, b) =>
+          new Date(b.date) - new Date(a.date) || b.timestamp - a.timestamp,
+      );
+      return sortedEntries[0].weight;
+    }
+
+    return userWeight || 67.5;
+  };
 
   const handleAddPress = () => {
     const selectedDateTime = new Date(selectedDate);
@@ -37,16 +53,9 @@ const HomeScreen = () => {
       return;
     }
 
-    const sortedEntries = [...weightEntries].sort(
-      (a, b) =>
-        new Date(b.date) - new Date(a.date) || b.timestamp - a.timestamp,
-    );
-    const initialWeight =
-      sortedEntries.length > 0 ? sortedEntries[0].weight : 67.5;
-
     setEditingEntry(null);
+    setInitialModalWeight(getInitialWeight());
     setIsModalVisible(true);
-    setInitialModalWeight(initialWeight);
   };
 
   const handleDeleteEntry = async entry => {
@@ -59,10 +68,17 @@ const HomeScreen = () => {
 
   const handleEditPress = entry => {
     setEditingEntry(entry);
+    setInitialModalWeight(entry.weight);
     setIsModalVisible(true);
   };
 
-  const handleWeightComplete = (selectedWeight, selectedTime, selectedCase) => {
+  const handleWeightComplete = async (
+    selectedWeight,
+    selectedTime,
+    selectedCase,
+  ) => {
+    setIsModalVisible(false); // 먼저 모달을 닫습니다.
+
     if (editingEntry) {
       const updatedEntries = weightEntries.map(entry =>
         entry.timestamp === editingEntry.timestamp
@@ -86,7 +102,6 @@ const HomeScreen = () => {
         Alert.alert('입력 제한', '하루에 최대 5개까지 기록할 수 있습니다.', [
           {text: '확인'},
         ]);
-        setIsModalVisible(false);
         return;
       }
 
@@ -103,8 +118,14 @@ const HomeScreen = () => {
       );
 
       setWeightEntries(updatedEntries);
+
+      // UserContext의 weight 업데이트
+      try {
+        await updateUserData(null, selectedWeight.toString());
+      } catch (error) {
+        console.error('Failed to update user weight:', error);
+      }
     }
-    setIsModalVisible(false);
   };
 
   const onDayPress = day => {
@@ -112,7 +133,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         {/* Calendar Section */}
         <View style={styles.calendarSection}>
@@ -156,7 +177,7 @@ const HomeScreen = () => {
         activeOpacity={0.8}>
         <Icon name="plus" size={24} color="#ffffff" />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -170,7 +191,6 @@ const styles = StyleSheet.create({
   },
   calendarSection: {
     backgroundColor: '#f1f8f8',
-    paddingTop: 60,
     width: '100%',
     alignItems: 'flex-start',
   },

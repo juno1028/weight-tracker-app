@@ -1,5 +1,4 @@
-// src/components/Modal/index.js
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -29,6 +28,22 @@ const WeightInputModal = ({
     initialTime.getMinutes(),
   );
   const [selectedCase, setSelectedCase] = useState(WEIGHT_CASES.NONE.id);
+
+  useEffect(() => {
+    if (isVisible) {
+      if (editingEntry) {
+        setSelectedWeight(editingEntry.weight);
+        setSelectedHour(new Date(editingEntry.timestamp).getHours());
+        setSelectedMinute(new Date(editingEntry.timestamp).getMinutes());
+        setSelectedCase(editingEntry.case);
+      } else {
+        setSelectedWeight(initialWeight);
+        setSelectedHour(initialTime.getHours());
+        setSelectedMinute(initialTime.getMinutes());
+        setSelectedCase(WEIGHT_CASES.NONE.id);
+      }
+    }
+  }, [isVisible, initialWeight, initialTime, editingEntry]);
 
   const handleTimeChange = (hour, minute) => {
     setSelectedHour(hour);

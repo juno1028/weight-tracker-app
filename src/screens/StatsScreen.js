@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,25 @@ const StatsScreen = () => {
   const {weightEntries} = useWeight();
   const [selectedPeriod, setSelectedPeriod] = useState(PERIODS.WEEK);
   const [selectedDay, setSelectedDay] = useState(null);
+  const scrollViewRef = React.useRef(null);
+
+  // 첫 렌더링 시 최신 데이터 선택
+  useEffect(() => {
+    if (chartData.length > 0 && !selectedDay) {
+      const latestDay = chartData[chartData.length - 1];
+      setSelectedDay(latestDay);
+    }
+  }, [chartData, selectedDay]);
+
+  // 스크롤뷰 ref 설정 후 스크롤
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current.scrollToEnd({animated: false});
+      }, 100);
+    }
+  }, []);
+
   const [visibleCases, setVisibleCases] = useState(
     Object.values(WEIGHT_CASES).map(c => c.id),
   );
@@ -216,6 +235,7 @@ const StatsScreen = () => {
         {/* Date Picker */}
         <View style={styles.datePickerContainer}>
           <ScrollView
+            ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.datePickerContent}>
@@ -406,7 +426,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   dateItem: {
-    width: 80, // 고정 너비 설정
+    width: 65, // 고정 너비 설정
     paddingVertical: 8,
     marginHorizontal: 4,
     borderRadius: 8,

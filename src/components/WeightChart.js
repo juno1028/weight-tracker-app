@@ -1,3 +1,4 @@
+// src/components/WeightChart.js
 import React from 'react';
 import {View, StyleSheet, Dimensions} from 'react-native';
 import Svg, {G, Line, Path, Rect, Text, Circle} from 'react-native-svg';
@@ -5,7 +6,7 @@ import * as d3 from 'd3-shape';
 import {scaleTime, scaleLinear} from 'd3-scale';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const CHART_WIDTH = SCREEN_WIDTH - 48; // 여백 증가
+const CHART_WIDTH = SCREEN_WIDTH - 48;
 const CHART_HEIGHT = 200;
 const PADDING = {top: 10, right: 40, bottom: 40, left: 40};
 
@@ -23,7 +24,7 @@ const getCaseColor = weightCase => {
 };
 
 const WeightChart = ({data, selectedDate, visibleCases}) => {
-  // 필터링된 데이터만 포함하는 새로운 배열 생성
+  // 필터링된 데이터 생성
   const filteredData = data.map(day => {
     const visibleWeights = day.weights.filter((_, index) =>
       visibleCases.includes(day.cases[index]),
@@ -35,9 +36,14 @@ const WeightChart = ({data, selectedDate, visibleCases}) => {
         visibleWeights.length > 0
           ? visibleWeights.reduce((sum, w) => sum + w, 0) /
             visibleWeights.length
-          : null, // 빈 경우 null로 설정
+          : null,
     };
   });
+
+  // 평균값이 있는 데이터만 필터링
+  const validAverageData = filteredData.filter(
+    day => day.visibleAverage !== null,
+  );
 
   // X축 스케일 (날짜)
   const xScale = scaleTime()
@@ -50,13 +56,15 @@ const WeightChart = ({data, selectedDate, visibleCases}) => {
     .domain([Math.min(...allWeights) - 1, Math.max(...allWeights) + 1])
     .range([CHART_HEIGHT - PADDING.bottom, PADDING.top]);
 
-  // null이 아닌 평균값만 연결하는 path 생성
-  const averagePath = d3
-    .line()
-    .x(d => xScale(new Date(d.date)))
-    .y(d => yScale(d.visibleAverage))
-    .defined(d => d.visibleAverage !== null) // null인 지점은 건너뛰기
-    .curve(d3.curveLinear)(filteredData);
+  // 유효한 데이터 포인트끼리 연결하는 path 생성
+  const averagePath =
+    validAverageData.length > 1
+      ? d3
+          .line()
+          .x(d => xScale(new Date(d.date)))
+          .y(d => yScale(d.visibleAverage))
+          .curve(d3.curveLinear)(validAverageData)
+      : null;
 
   // 기간에 따른 x축 레이블 표시 간격 결정
   const getXAxisInterval = () => {
@@ -192,7 +200,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center', // 중앙 정렬을 위해 추가
+    alignItems: 'center',
   },
 });
 

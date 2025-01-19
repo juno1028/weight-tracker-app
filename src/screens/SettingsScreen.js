@@ -1,228 +1,227 @@
-// src/screens/SettingsScreen.js
 import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Switch,
+  TextInput,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
+  ScrollView,
+  SafeAreaView,
 } from 'react-native';
-import {useSettings} from '../contexts/SettingsContext';
-import * as RNIap from 'react-native-iap';
-
-const productIds = ['1234']; // 테스트용 상품 ID
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useUser} from '../contexts/UserContext';
 
 const SettingsScreen = () => {
-  const {showAllWeights, toggleShowAllWeights} = useSettings();
-  const [isPurchased, setIsPurchased] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [products, setProducts] = useState([]);
+  const {height, weight, updateUserData} = useUser();
+  const [heightInput, setHeightInput] = useState('');
+  const [weightInput, setWeightInput] = useState('');
 
   useEffect(() => {
-    initializeIAP();
-    return () => {
-      RNIap.endConnection();
-    };
-  }, []);
+    if (height) setHeightInput(height.toString());
+    if (weight) setWeightInput(weight.toString());
+  }, [height, weight]);
 
-  const initializeIAP = async () => {
+  const handleSave = async () => {
+    if (!heightInput || !weightInput) {
+      Alert.alert('입력 오류', '키와 몸무게를 모두 입력해주세요.');
+      return;
+    }
+
+    const heightNum = parseFloat(heightInput);
+    const weightNum = parseFloat(weightInput);
+
+    if (isNaN(heightNum) || isNaN(weightNum)) {
+      Alert.alert('입력 오류', '올바른 숫자를 입력해주세요.');
+      return;
+    }
+
+    if (heightNum < 100 || heightNum > 250) {
+      Alert.alert('입력 오류', '키는 100cm에서 250cm 사이여야 합니다.');
+      return;
+    }
+
+    if (weightNum < 20 || weightNum > 200) {
+      Alert.alert('입력 오류', '몸무게는 20kg에서 200kg 사이여야 합니다.');
+      return;
+    }
+
     try {
-      setIsLoading(true);
-      await RNIap.initConnection();
-
-      // 구매 내역 확인
-      const purchases = await RNIap.getAvailablePurchases();
-      if (purchases.length > 0) {
-        setIsPurchased(true);
-      }
-
-      // 상품 정보 가져오기
-      const products = await RNIap.getProducts(productIds);
-      setProducts(products);
-    } catch (err) {
-      console.warn(err);
-      Alert.alert('오류', '구독 정보를 불러오는데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
+      await updateUserData(heightInput, weightInput);
+      Alert.alert('성공', '신체 정보가 저장되었습니다.');
+    } catch (error) {
+      console.error('Failed to save user data:', error);
+      Alert.alert('오류', '데이터 저장에 실패했습니다.');
     }
   };
 
-  const handlePurchase = async () => {
+  const resetToFirstLaunch = async () => {
     try {
-      setIsLoading(true);
-      if (products.length === 0) {
-        Alert.alert('오류', '구매 가능한 상품이 없습니다.');
-        return;
-      }
-
-      // iOS의 경우 구매 요청
-      const result = await RNIap.requestPurchase(productIds[0], false);
-      console.log('Purchase result:', result);
-
-      setIsPurchased(true);
-      Alert.alert('성공', '구독이 완료되었습니다.');
-    } catch (err) {
-      if (err.code !== 'E_USER_CANCELLED') {
-        // 사용자가 취소한 경우는 에러 메시지 표시하지 않음
-        Alert.alert('오류', '구매 중 오류가 발생했습니다.');
-        console.warn(err);
-      }
-    } finally {
-      setIsLoading(false);
+      await AsyncStorage.setItem('isFirstLaunch', 'true');
+      Alert.alert(
+        '초기화 완료',
+        '앱을 다시 시작하면 초기 설정 화면이 표시됩니다.',
+      );
+    } catch (error) {
+      console.error('Failed to reset first launch state:', error);
     }
-  };
-
-  const handleCancelSubscription = () => {
-    Alert.alert(
-      '구독 취소',
-      'App Store에서 구독을 취소하시겠습니까?',
-      [
-        {
-          text: '취소',
-          style: 'cancel',
-        },
-        {
-          text: 'App Store 열기',
-          onPress: () => {
-            // 실제로는 App Store의 구독 관리 페이지로 이동
-            // 테스트를 위해 상태만 변경
-            setIsPurchased(false);
-            Alert.alert('안내', '구독이 취소되었습니다.');
-          },
-        },
-      ],
-      {cancelable: false},
-    );
   };
 
   return (
-    <View style={styles.container}>
-      {/* 기존 설정 */}
-      <View style={styles.section}>
-        <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>모든 체중 기록 표시</Text>
-          <Switch
-            value={showAllWeights}
-            onValueChange={toggleShowAllWeights}
-            trackColor={{false: '#767577', true: '#50cebb'}}
-            thumbColor={showAllWeights ? '#fff' : '#f4f3f4'}
-          />
-          <Text style={styles.settingDescription}>
-            {showAllWeights
-              ? '모든 기록 표시 (최대 5개)'
-              : '최근 3개 기록만 표시'}
-          </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>설정</Text>
         </View>
-      </View>
 
-      {/* 구독 섹션 */}
-      <View style={styles.section}>
-        <View style={styles.subscriptionContainer}>
-          <Text style={styles.subscriptionTitle}>프리미엄 구독</Text>
-          {isLoading ? (
-            <ActivityIndicator
-              size="small"
-              color="#50cebb"
-              style={styles.loader}
-            />
-          ) : (
-            <>
-              <Text style={styles.subscriptionStatus}>
-                상태: {isPurchased ? '결제완료' : '결제 미진행'}
-              </Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>신체 정보</Text>
 
-              {!isPurchased ? (
-                <TouchableOpacity
-                  style={styles.subscriptionButton}
-                  onPress={handlePurchase}>
-                  <Text style={styles.buttonText}>구독하기</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={[styles.subscriptionButton, styles.cancelButton]}
-                  onPress={handleCancelSubscription}>
-                  <Text style={styles.buttonText}>구독 취소</Text>
-                </TouchableOpacity>
-              )}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>키</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={heightInput}
+                onChangeText={setHeightInput}
+                placeholder="키를 입력하세요"
+                keyboardType="decimal-pad"
+                maxLength={5}
+              />
+              <Text style={styles.unit}>cm</Text>
+            </View>
+          </View>
 
-              <Text style={styles.priceInfo}>
-                {isPurchased ? '현재 프리미엄 구독 중입니다' : '월 3,900원'}
-              </Text>
-            </>
-          )}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>몸무게</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={weightInput}
+                onChangeText={setWeightInput}
+                placeholder="몸무게를 입력하세요"
+                keyboardType="decimal-pad"
+                maxLength={5}
+              />
+              <Text style={styles.unit}>kg</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>저장하기</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-    </View>
+
+        <View style={styles.devSection}>
+          <Text style={styles.devSectionTitle}>개발자 옵션</Text>
+          <TouchableOpacity
+            style={styles.resetButton}
+            onPress={resetToFirstLaunch}>
+            <Text style={styles.resetButtonText}>초기 실행 상태로 리셋</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f1f8f8',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    paddingTop: 20,
+    paddingHorizontal: 16,
+    backgroundColor: '#f1f8f8',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#0d1b1a',
+    marginBottom: 16,
   },
   section: {
     backgroundColor: 'white',
-    marginTop: 20,
-    padding: 20,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  settingItem: {
-    marginBottom: 10,
-  },
-  settingLabel: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 8,
-  },
-  settingDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
-  },
-  subscriptionContainer: {
-    alignItems: 'center',
+    margin: 16,
     padding: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  subscriptionTitle: {
+  sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subscriptionStatus: {
-    fontSize: 16,
-    color: '#666',
+    fontWeight: '600',
+    color: '#0d1b1a',
     marginBottom: 16,
   },
-  subscriptionButton: {
-    backgroundColor: '#50cebb',
-    paddingHorizontal: 24,
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+  },
+  input: {
+    flex: 1,
+    height: 48,
+    fontSize: 16,
+    color: '#333',
+  },
+  unit: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 8,
+  },
+  saveButton: {
+    backgroundColor: '#4ecdc4',
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 8,
-    minWidth: 200,
-    alignItems: 'center',
   },
-  cancelButton: {
-    backgroundColor: '#ff6b6b',
-  },
-  buttonText: {
+  saveButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
-  priceInfo: {
-    marginTop: 12,
+  devSection: {
+    backgroundColor: '#f8f9fa',
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  devSectionTitle: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 12,
   },
-  loader: {
-    marginVertical: 20,
+  resetButton: {
+    backgroundColor: '#ff6b6b',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  resetButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 
