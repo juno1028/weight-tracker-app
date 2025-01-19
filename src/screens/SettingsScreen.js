@@ -112,14 +112,14 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.devSection}>
+        {/* <View style={styles.devSection}>
           <Text style={styles.devSectionTitle}>개발자 옵션</Text>
           <TouchableOpacity
             style={styles.resetButton}
             onPress={resetToFirstLaunch}>
             <Text style={styles.resetButtonText}>초기 실행 상태로 리셋</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
