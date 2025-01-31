@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useUser} from '../contexts/UserContext';
@@ -18,6 +20,9 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
   const {updateUserData} = useUser();
 
   const handleComplete = async () => {
+    // 버튼 클릭 시 키보드 닫기 (선택사항)
+    Keyboard.dismiss();
+
     if (!heightInput || !weightInput) {
       Alert.alert('입력 오류', '키와 몸무게를 모두 입력해주세요.');
       return;
@@ -54,50 +59,52 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
 
   return (
     <Modal visible={isVisible} animationType="slide">
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>환영합니다!</Text>
-          <Text style={styles.subtitle}>
-            체중 관리를 시작하기 전에{'\n'}기본 정보를 입력해주세요
-          </Text>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.content}>
+            <Text style={styles.title}>환영합니다!</Text>
+            <Text style={styles.subtitle}>
+              체중 관리를 시작하기 전에{'\n'}기본 정보를 입력해주세요
+            </Text>
 
-          <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>키</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={heightInput}
-                  onChangeText={setHeightInput}
-                  placeholder="키를 입력하세요"
-                  keyboardType="decimal-pad"
-                  maxLength={5}
-                />
-                <Text style={styles.unit}>cm</Text>
+            <View style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>키</Text>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={heightInput}
+                    onChangeText={setHeightInput}
+                    placeholder="키를 입력하세요"
+                    keyboardType="decimal-pad"
+                    maxLength={5}
+                  />
+                  <Text style={styles.unit}>cm</Text>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>몸무게</Text>
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={weightInput}
+                    onChangeText={setWeightInput}
+                    placeholder="몸무게를 입력하세요"
+                    keyboardType="decimal-pad"
+                    maxLength={5}
+                  />
+                  <Text style={styles.unit}>kg</Text>
+                </View>
               </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>몸무게</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={weightInput}
-                  onChangeText={setWeightInput}
-                  placeholder="몸무게를 입력하세요"
-                  keyboardType="decimal-pad"
-                  maxLength={5}
-                />
-                <Text style={styles.unit}>kg</Text>
-              </View>
-            </View>
+            <TouchableOpacity style={styles.button} onPress={handleComplete}>
+              <Text style={styles.buttonText}>시작하기</Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity style={styles.button} onPress={handleComplete}>
-            <Text style={styles.buttonText}>시작하기</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

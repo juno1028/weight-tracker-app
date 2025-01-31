@@ -7,6 +7,8 @@ import {
   ScrollView,
   Animated,
   SafeAreaView,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -67,6 +69,12 @@ const BMIScreen = () => {
       }).start();
     }
   }, [bmi, bmiAnimation]);
+
+  const handleCitationPress = () => {
+    Linking.openURL(
+      'https://health.kdca.go.kr/healthinfo/biz/health/gnrlzHealthInfo/gnrlzHealthInfo/gnrlzHealthInfoView.do',
+    );
+  };
 
   if (!height || !bmi) {
     return (
@@ -174,6 +182,13 @@ const BMIScreen = () => {
               </View>
             ))}
           </View>
+        </View>
+
+        {/* 출처 보기 버튼 */}
+        <View style={styles.citationContainer}>
+          <TouchableOpacity onPress={handleCitationPress}>
+            <Text style={styles.citationText}>출처 보기</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -345,6 +360,16 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  citationContainer: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  citationText: {
+    fontSize: 16,
+    color: '#1E90FF',
+    textDecorationLine: 'underline',
   },
 });
 

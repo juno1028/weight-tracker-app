@@ -479,6 +479,8 @@
 				DEVELOPMENT_TEAM = 92S7WRQZ8N;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = WeightTrackApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "몸무게 기록";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -489,7 +491,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.deepResearch.weightTrack;
 				PRODUCT_NAME = WeightTrackApp;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -506,6 +508,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 92S7WRQZ8N;
 				INFOPLIST_FILE = WeightTrackApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "몸무게 기록";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -516,7 +520,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.deepResearch.weightTrack;
 				PRODUCT_NAME = WeightTrackApp;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
