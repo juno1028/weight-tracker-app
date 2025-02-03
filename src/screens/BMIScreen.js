@@ -70,12 +70,6 @@ const BMIScreen = () => {
     }
   }, [bmi, bmiAnimation]);
 
-  const handleCitationPress = () => {
-    Linking.openURL(
-      'https://health.kdca.go.kr/healthinfo/biz/health/gnrlzHealthInfo/gnrlzHealthInfo/gnrlzHealthInfoView.do',
-    );
-  };
-
   if (!height || !bmi) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -183,11 +177,19 @@ const BMIScreen = () => {
             ))}
           </View>
         </View>
-
-        {/* 출처 보기 버튼 */}
+        {/* BMI 계산 공식 및 출처 섹션 추가 */}
         <View style={styles.citationContainer}>
-          <TouchableOpacity onPress={handleCitationPress}>
-            <Text style={styles.citationText}>출처 보기</Text>
+          <Text style={styles.citationTitle}>정보 출처</Text>
+          <Text style={styles.citationItem}>
+            BMI 계산 공식: 체중(kg) ÷ (신장(m))²
+          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL(
+                'https://www.cdc.gov/bmi/faq/?CDC_AAref_Val=https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html',
+              )
+            }>
+            <Text style={styles.linkText}>CDC – BMI 계산 방식 및 FAQ</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -362,12 +364,30 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   citationContainer: {
+    backgroundColor: 'white',
     marginHorizontal: 16,
     marginBottom: 24,
-    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  citationText: {
-    fontSize: 16,
+  citationTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#0d1b1a',
+    marginBottom: 8,
+  },
+  citationItem: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  linkText: {
+    fontSize: 14,
     color: '#1E90FF',
     textDecorationLine: 'underline',
   },
