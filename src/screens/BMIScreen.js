@@ -10,10 +10,10 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useWeight} from '../contexts/WeightContext';
 import {useUser} from '../contexts/UserContext';
+import {useSubscription} from '../contexts/SubscriptionContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const GAUGE_WIDTH = SCREEN_WIDTH - 64;
@@ -22,6 +22,7 @@ const BMIScreen = () => {
   const {weightEntries} = useWeight();
   const {height, weight} = useUser();
   const [bmiAnimation] = useState(new Animated.Value(0));
+  const {isSubscribed} = useSubscription();
 
   // 최근 체중 가져오기
   const getLatestWeight = () => {
@@ -58,7 +59,6 @@ const BMIScreen = () => {
   const bmiInfo = bmi ? getBMICategory(bmi) : null;
   const latestWeight = getLatestWeight();
 
-  // BMI 게이지 애니메이션
   useEffect(() => {
     if (bmi) {
       const targetValue = Math.min(Math.max((bmi - 15) / 20, 0), 1);
@@ -68,7 +68,26 @@ const BMIScreen = () => {
         useNativeDriver: false,
       }).start();
     }
-  }, [bmi, bmiAnimation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bmi]);
+
+  if (!isSubscribed) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>BMI 지수</Text>
+          </View>
+          <View style={styles.proMemberContainer}>
+            <Icon name="lock" size={48} color="#ccc" />
+            <Text style={styles.proMemberText}>
+              프로 회원만 사용 가능한 페이지입니다.
+            </Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   if (!height || !bmi) {
     return (
@@ -177,7 +196,7 @@ const BMIScreen = () => {
             ))}
           </View>
         </View>
-        {/* BMI 계산 공식 및 출처 섹션 추가 */}
+
         <View style={styles.citationContainer}>
           <Text style={styles.citationTitle}>정보 출처</Text>
           <Text style={styles.citationItem}>
@@ -390,6 +409,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1E90FF',
     textDecorationLine: 'underline',
+  },
+  proMemberContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingTop: 120,
+  },
+  proMemberText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
 
