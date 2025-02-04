@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useUser} from '../contexts/UserContext';
+import {useSubscription} from '../contexts/SubscriptionContext';
 
 const SettingsScreen = () => {
   const {height, weight, updateUserData} = useUser();
   const [heightInput, setHeightInput] = useState('');
   const [weightInput, setWeightInput] = useState('');
+  const {isSubscribed, loading, handlePurchase} = useSubscription();
 
   useEffect(() => {
     if (height) setHeightInput(height.toString());
@@ -67,6 +69,17 @@ const SettingsScreen = () => {
     }
   };
 
+  const handleSubscribePress = async () => {
+    if (!isSubscribed) {
+      const success = await handlePurchase();
+      if (success) {
+        Alert.alert('성공', '구독이 완료되었습니다.');
+      } else {
+        Alert.alert('오류', '구독 처리 중 문제가 발생했습니다.');
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -112,14 +125,25 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* <View style={styles.devSection}>
-          <Text style={styles.devSectionTitle}>개발자 옵션</Text>
-          <TouchableOpacity
-            style={styles.resetButton}
-            onPress={resetToFirstLaunch}>
-            <Text style={styles.resetButtonText}>초기 실행 상태로 리셋</Text>
-          </TouchableOpacity>
-        </View> */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>구독 정보</Text>
+          <View style={styles.subscriptionContainer}>
+            <Text style={styles.subscriptionStatus}>
+              {loading
+                ? '로딩중...'
+                : isSubscribed
+                ? '구독중입니다.'
+                : '구독중이지 않습니다.'}
+            </Text>
+            {!isSubscribed && (
+              <TouchableOpacity
+                style={styles.subscribeButton}
+                onPress={handleSubscribePress}>
+                <Text style={styles.subscribeButtonText}>구독하기</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

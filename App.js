@@ -11,6 +11,7 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import {WeightProvider} from './src/contexts/WeightContext';
 import {SettingsProvider} from './src/contexts/SettingsContext';
 import {UserProvider} from './src/contexts/UserContext';
+import {SubscriptionProvider} from './src/contexts/SubscriptionContext';
 import InitialSetupModal from './src/components/InitialSetupModal';
 
 const Tab = createBottomTabNavigator();
@@ -97,19 +98,21 @@ const App = () => {
   }
 
   return (
-    <UserProvider>
-      <WeightProvider>
-        <SettingsProvider>
-          <NavigationContainer>
-            <TabNavigator isFirstLaunch={isFirstLaunch} />
-            <InitialSetupModal
-              isVisible={isFirstLaunch}
-              onComplete={handleInitialSetupComplete}
-            />
-          </NavigationContainer>
-        </SettingsProvider>
-      </WeightProvider>
-    </UserProvider>
+    <SubscriptionProvider>
+      <UserProvider>
+        <WeightProvider>
+          <SettingsProvider>
+            <NavigationContainer>
+              <TabNavigator isFirstLaunch={isFirstLaunch} />
+              <InitialSetupModal
+                isVisible={isFirstLaunch}
+                onComplete={handleInitialSetupComplete}
+              />
+            </NavigationContainer>
+          </SettingsProvider>
+        </WeightProvider>
+      </UserProvider>
+    </SubscriptionProvider>
   );
 };
 

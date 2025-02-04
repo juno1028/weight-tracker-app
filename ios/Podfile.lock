@@ -7,6 +7,8 @@ PODS:
   - hermes-engine (0.75.3):
     - hermes-engine/Pre-built (= 0.75.3)
   - hermes-engine/Pre-built (0.75.3)
+  - PurchasesHybridCommon (13.16.2):
+    - RevenueCat (= 5.15.0)
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -1499,6 +1501,7 @@ PODS:
     - React-logger (= 0.75.3)
     - React-perflogger (= 0.75.3)
     - React-utils (= 0.75.3)
+  - RevenueCat (5.15.0)
   - RNCAsyncStorage (2.1.0):
     - React-Core
   - RNCPicker (2.11.0):
@@ -1525,6 +1528,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - RNIap (12.16.0):
+    - React-Core
+  - RNPurchases (8.5.2):
+    - PurchasesHybridCommon (= 13.16.2)
     - React-Core
   - RNReactNativeHapticFeedback (2.3.3):
     - DoubleConversion
@@ -1751,6 +1757,7 @@ DEPENDENCIES:
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNIap (from `../node_modules/react-native-iap`)
+  - RNPurchases (from `../node_modules/react-native-purchases`)
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -1760,6 +1767,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - PurchasesHybridCommon
+    - RevenueCat
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1896,6 +1905,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNIap:
     :path: "../node_modules/react-native-iap"
+  RNPurchases:
+    :path: "../node_modules/react-native-purchases"
   RNReactNativeHapticFeedback:
     :path: "../node_modules/react-native-haptic-feedback"
   RNReanimated:
@@ -1916,6 +1927,7 @@ SPEC CHECKSUMS:
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
   hermes-engine: 8d2103d6c0176779aea4e25df6bb1410f9946680
+  PurchasesHybridCommon: 9fbb4c76f20b8e9b74f13b9045c6ed90727f935b
   RCT-Folly: 4464f4d875961fce86008d45f4ecf6cef6de0740
   RCTDeprecation: 4191f6e64b72d9743f6fe1a8a16e89e868f5e9e7
   RCTRequired: 9bb589570f2bb3abc6518761e3fd1ad9b7f7f06c
@@ -1972,10 +1984,12 @@ SPEC CHECKSUMS:
   React-utils: f2afa6acd905ca2ce7bb8ffb4a22f7f8a12534e8
   ReactCodegen: ff95a93d5ab5d9b2551571886271478eaa168565
   ReactCommon: 289214026502e6a93484f4a46bcc0efa4f3f2864
+  RevenueCat: 90e7642834cabc3e04e396117776bfb3f50debbf
   RNCAsyncStorage: cc6479c4acd84cc7004946946c8afe30b018184d
   RNCPicker: 4f6d5e8d107064be32dfc8f1bcb5a3741135db0b
   RNGestureHandler: aa9690789023c9be8f06aa90e10ce637ea788f4d
   RNIap: 4a40df8443e6bc4f02ea936beda006743c487f6a
+  RNPurchases: 27a69e9187b651d4d84af7558d6f392e38c11810
   RNReactNativeHapticFeedback: 0d591ea1e150f36cb96d868d4e8d77272243d78a
   RNReanimated: 56be6651e5d70985cdc4656372fc70291ecab65f
   RNScreens: c7ceced6a8384cb9be5e7a5e88e9e714401fd958
