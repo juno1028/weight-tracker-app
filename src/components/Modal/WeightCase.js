@@ -8,27 +8,23 @@ const WeightCase = ({selectedCase, onSelectCase}) => {
     switch (caseId) {
       case 'empty_stomach':
         return {
-          backgroundColor: selectedCase === caseId ? '#E8F7F4' : 'transparent',
-          borderColor: '#4ECDC4',
-          textColor: selectedCase === caseId ? '#4ECDC4' : '#333',
+          backgroundColor: selectedCase === caseId ? '#007AFF1F' : '#d9ebff',
+          textColor: '#007AFF',
         };
       case 'after_meal':
         return {
-          backgroundColor: selectedCase === caseId ? '#FFF8F8' : 'transparent',
-          borderColor: '#FF9B9B',
-          textColor: selectedCase === caseId ? '#FF6B6B' : '#333',
+          backgroundColor: selectedCase === caseId ? '#34C7591F' : '#e1f7e6',
+          textColor: '#34C759',
         };
       case 'after_workout':
         return {
-          backgroundColor: selectedCase === caseId ? '#FFF9F5' : 'transparent',
-          borderColor: '#FFB74D',
-          textColor: selectedCase === caseId ? '#FF9800' : '#333',
+          backgroundColor: selectedCase === caseId ? '#FF95001F' : '#ffeed9',
+          textColor: '#FF9500',
         };
       default:
         return {
-          backgroundColor: selectedCase === caseId ? '#F8F9FA' : 'transparent',
-          borderColor: '#DDD',
-          textColor: selectedCase === caseId ? '#666' : '#333',
+          backgroundColor: selectedCase === caseId ? '#5856D61F' : '#e6e6f9',
+          textColor: '#5856D6',
         };
     }
   };
@@ -45,10 +41,10 @@ const WeightCase = ({selectedCase, onSelectCase}) => {
                 styles.button,
                 {
                   backgroundColor: caseStyle.backgroundColor,
-                  borderColor: caseStyle.borderColor,
                 },
               ]}
-              onPress={() => onSelectCase(caseItem.id)}>
+              onPress={() => onSelectCase(caseItem.id)}
+              activeOpacity={0.7}>
               <Text style={[styles.buttonText, {color: caseStyle.textColor}]}>
                 {caseItem.label}
               </Text>
@@ -72,16 +68,14 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 24,
-    backgroundColor: 'white',
-    borderWidth: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });
 

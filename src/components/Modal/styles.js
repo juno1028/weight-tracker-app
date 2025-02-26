@@ -1,9 +1,11 @@
+// src/components/Modal/styles.js - Updated with lighter color
 import {Dimensions} from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export const COLORS = {
-  primary: '#50cebb',
+  // Lighter version of #FF9500
+  primary: '#FFC069',
   white: '#ffffff',
   separator: 'rgba(255,255,255,0.1)',
   indicator: 'rgba(255, 149, 0, 0.5)',
@@ -12,7 +14,7 @@ export const COLORS = {
 export const COMMON_STYLES = {
   sectionContent: {
     flexDirection: 'row',
-    height: 140,
+    height: 130,
   },
   displaySide: {
     flex: 1,

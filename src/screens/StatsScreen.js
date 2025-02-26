@@ -1,3 +1,4 @@
+// src/screens/StatsScreen.js
 import React, {useState, useMemo, useEffect} from 'react';
 import {
   View,
@@ -141,6 +142,25 @@ const StatsScreen = () => {
     }
   };
 
+  const getTextColorForCase = caseId => {
+    const isActive = visibleCases.includes(caseId);
+    switch (caseId) {
+      case 'empty_stomach':
+        return isActive ? '#4ECDC4' : '#99d9d4';
+      case 'after_meal':
+        return isActive ? '#FF9B9B' : '#ffcccc';
+      case 'after_workout':
+        return isActive ? '#FFB74D' : '#ffdca6';
+      default:
+        return isActive ? '#999' : '#ccc';
+    }
+  };
+
+  const getBorderColorForCase = caseId => {
+    const isActive = visibleCases.includes(caseId);
+    return isActive ? '#666666' : '#e0e0e0';
+  };
+
   const formatDate = dateStr => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('ko-KR', {
@@ -203,9 +223,7 @@ const StatsScreen = () => {
                       styles.filterButton,
                       {
                         backgroundColor: getFilterBackgroundColor(caseItem.id),
-                        borderColor: visibleCases.includes(caseItem.id)
-                          ? '#666666'
-                          : '#e0e0e0',
+                        borderColor: getBorderColorForCase(caseItem.id),
                       },
                     ]}
                     onPress={() => toggleCase(caseItem.id)}
@@ -213,8 +231,7 @@ const StatsScreen = () => {
                     <Text
                       style={[
                         styles.filterText,
-                        !visibleCases.includes(caseItem.id) &&
-                          styles.inactiveFilterText,
+                        {color: getTextColorForCase(caseItem.id)},
                       ]}>
                       {caseItem.label}
                     </Text>
@@ -353,6 +370,19 @@ const StatsScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  filterButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#f1f8f8',
@@ -462,23 +492,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
-  },
-  filterButton: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterText: {
-    fontSize: 12,
-    color: '#333',
-    fontWeight: '500',
-  },
-  inactiveFilterText: {
-    color: '#999',
   },
   noDataContainer: {
     padding: 48,

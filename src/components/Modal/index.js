@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     flex: 1,
     backgroundColor: '#FF6B6B',
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderRadius: 10,
   },
   deleteButtonText: {
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   completeButton: {
     flex: 2,
     backgroundColor: COLORS.white,
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderRadius: 10,
   },
   completeButtonFullWidth: {

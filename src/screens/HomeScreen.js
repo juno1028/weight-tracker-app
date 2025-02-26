@@ -1,3 +1,4 @@
+// src/screens/HomeScreen.js
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -14,6 +15,7 @@ import WeightInputModal from '../components/Modal';
 import {useWeight} from '../contexts/WeightContext';
 import {useUser} from '../contexts/UserContext';
 import {WEIGHT_CASES} from '../components/Modal/constants';
+import AnimatedWeightCard from '../components/AnimatedWeightCard';
 
 const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -51,10 +53,7 @@ const HomeScreen = () => {
     today.setHours(0, 0, 0, 0);
 
     if (selectedDateTime > today) {
-      Alert.alert(
-        '날짜 확인',
-        '혹시 미래에서 오셨나요? 😅\n오늘 이후의 날짜는 입력할 수 없습니다.',
-      );
+      Alert.alert('날짜 확인', '오늘 이후의 날짜는 입력할 수 없습니다.');
       return;
     }
     setEditingEntry(null);
@@ -167,8 +166,7 @@ const HomeScreen = () => {
     const date = new Date(timestamp);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    // const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `오후 ${hours}시 ${minutes}분`;
+    return `${hours}:${minutes}`;
   };
 
   // Render the selected entry detail cards
@@ -176,33 +174,37 @@ const HomeScreen = () => {
     if (!selectedEntries || selectedEntries.length === 0) {
       return null;
     }
+
     // Sort entries by timestamp (newest first)
     const sortedEntries = [...selectedEntries].sort(
       (a, b) => b.timestamp - a.timestamp,
     );
+
     return sortedEntries.map(entry => {
       const caseBgColor = getStatusColor(entry.case);
       const textColor = getTextColorForCase(entry.case);
+
       return (
-        <TouchableOpacity
+        <AnimatedWeightCard
           key={entry.timestamp}
-          style={[styles.weightCard, {backgroundColor: caseBgColor}]}
-          onPress={() => handleEditPress(entry)}>
-          <View style={styles.weightCardHeader}>
-            <Text style={[styles.weightCaseText, {color: textColor}]}>
-              {getCaseLabel(entry.case)}
-            </Text>
-            <Text style={styles.weightValue}>
-              {entry.weight.toFixed(1)}{' '}
-              <Text style={styles.weightUnit}>kg</Text>
-            </Text>
-          </View>
-          <Text style={styles.weightTimeText}>
-            {formatTime(entry.timestamp)}
-          </Text>
-        </TouchableOpacity>
+          entry={entry}
+          backgroundColor={caseBgColor}
+          textColor={textColor}
+          formatTime={formatTime}
+          getCaseLabel={getCaseLabel}
+          onPress={() => handleEditPress(entry)}
+        />
       );
     });
+  };
+
+  // Check if selected date is in the future
+  const isSelectedDateInFuture = () => {
+    const selectedDateTime = new Date(selectedDate);
+    const today = new Date();
+    selectedDateTime.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return selectedDateTime > today;
   };
 
   return (
@@ -217,7 +219,18 @@ const HomeScreen = () => {
           />
         </View>
         {/* Weight List Section */}
-        <View style={styles.weightCardsSection}>{renderWeightCards()}</View>
+        <View style={styles.weightCardsSection}>
+          {selectedEntries.length > 0 ? (
+            renderWeightCards()
+          ) : !isSelectedDateInFuture() ? (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataTitle}>추가된 체중 기록이 없어요</Text>
+              <Text style={styles.noDataSubtitle}>
+                체중 기록을 추가해주세요
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </ScrollView>
       <WeightInputModal
         isVisible={isModalVisible}
@@ -267,40 +280,20 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 80, // Extra padding at bottom for FAB
   },
-  weightCard: {
-    width: '100%',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  weightCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  noDataContainer: {
     alignItems: 'center',
-    marginBottom: 8,
+    justifyContent: 'center',
+    paddingVertical: 60,
   },
-  weightCaseText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  weightValue: {
-    fontSize: 24,
+  noDataTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 8,
   },
-  weightUnit: {
+  noDataSubtitle: {
     fontSize: 16,
-    fontWeight: 'normal',
-    color: '#666',
-  },
-  weightTimeText: {
-    fontSize: 14,
-    color: '#888',
+    color: '#999',
   },
   fab: {
     position: 'absolute',

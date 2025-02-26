@@ -28,20 +28,6 @@ const CustomWeekdaysHeader = () => {
   );
 };
 
-// Helper: Returns the opaque base color for a given filter case
-const getSolidFilterColor = caseId => {
-  switch (caseId) {
-    case 'empty_stomach':
-      return '#007AFF';
-    case 'after_meal':
-      return '#34C759';
-    case 'after_workout':
-      return '#FF9500';
-    default:
-      return '#5856D6';
-  }
-};
-
 const WeightCalendar = ({
   onDayPress,
   selectedDate,
@@ -147,6 +133,20 @@ const WeightCalendar = ({
     }
   };
 
+  const getSolidFilterColor = caseId => {
+    const isActive = activeFilters.includes(caseId);
+    switch (caseId) {
+      case 'empty_stomach':
+        return isActive ? '#007AFF' : '#99C2FF'; // Blue - normal/lighter
+      case 'after_meal':
+        return isActive ? '#34C759' : '#A8E9BC'; // Green - normal/lighter
+      case 'after_workout':
+        return isActive ? '#FF9500' : '#FFCB80'; // Orange - normal/lighter
+      default:
+        return isActive ? '#5856D6' : '#BEBDEA'; // Purple - normal/lighter
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Custom Header */}
@@ -238,7 +238,7 @@ const WeightCalendar = ({
         <View style={styles.filterRow}>
           {Object.values(WEIGHT_CASES).map(caseItem => {
             const isPressed = pressedFilter === caseItem.id;
-            const solidColor = getSolidFilterColor(caseItem.id);
+            // const solidColor = getSolidFilterColor(caseItem.id);
             return (
               <TouchableOpacity
                 key={caseItem.id}
@@ -253,7 +253,14 @@ const WeightCalendar = ({
                 onPressOut={handlePressOut}
                 onPress={() => toggleFilter(caseItem.id)}
                 activeOpacity={0.8}>
-                <Text style={[styles.filterText, {color: solidColor}]}>
+                <Text
+                  style={[
+                    styles.filterText,
+                    isPressed,
+                    {
+                      color: getSolidFilterColor(caseItem.id),
+                    },
+                  ]}>
                   {caseItem.label}
                 </Text>
               </TouchableOpacity>
