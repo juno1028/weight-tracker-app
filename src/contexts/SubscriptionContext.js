@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, {createContext, useContext, useState, useCallback} from 'react';
 import Purchases from 'react-native-purchases';
 import {Platform} from 'react-native';
 
@@ -21,6 +15,12 @@ export const SubscriptionProvider = ({children}) => {
   const checkSubscriptionStatus = useCallback(async () => {
     try {
       const customerInfo = await Purchases.getCustomerInfo();
+      console.log('Customer info:', customerInfo);
+
+      // Check if the 'pro' entitlement is active
+      const isPro = customerInfo.entitlements.active['pro'] !== undefined;
+      console.log('Is Pro:', isPro);
+
       setIsSubscribed(customerInfo.activeSubscriptions.length > 0);
     } catch (error) {
       console.error('Failed to get customer info:', error);
@@ -59,16 +59,21 @@ export const SubscriptionProvider = ({children}) => {
       const offerings = await Purchases.getOfferings();
       console.log('Offerings:', offerings); // 전체 offerings 객체 확인
 
-      if (offerings.current !== null && offerings.current.monthly !== null) {
-        console.log('2. Found monthly offering:', offerings.current.monthly);
+      // Check if the specific offering exists
+      const offeringIdentifier = 'weight_tracker_premium_monthly';
+      const offering = offerings.all[offeringIdentifier];
+
+      if (offering && offering.monthly) {
+        console.log('2. Found monthly package:', offering.monthly);
         const {customerInfo} = await Purchases.purchasePackage(
-          offerings.current.monthly,
+          offering.monthly,
         );
         console.log('3. Purchase successful:', customerInfo);
-        setIsSubscribed(customerInfo.activeSubscriptions.length > 0);
+        const isPro = customerInfo.entitlements.active['pro'] !== undefined;
+        setIsSubscribed(isPro);
         return true;
       } else {
-        console.log('Error: No monthly offering found in:', offerings);
+        console.log('Error: No monthly package found in offering:', offering);
         return false;
       }
     } catch (error) {

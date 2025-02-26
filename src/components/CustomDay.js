@@ -5,19 +5,39 @@ import {TouchableOpacity, Text, View, StyleSheet} from 'react-native';
 const getStatusColor = weightCase => {
   switch (weightCase) {
     case 'empty_stomach':
-      return 'rgba(78, 205, 196, 0.15)'; // 민트색
+      return '#007AFF1F'; // 공복
     case 'after_meal':
-      return 'rgba(255, 155, 155, 0.15)'; // 연한 빨강
+      return '#34C7591F'; // 식사 후
     case 'after_workout':
-      return 'rgba(255, 183, 77, 0.15)'; // 연한 주황
+      return '#FF95001F'; // 운동 후
     default:
-      return 'rgba(200, 200, 200, 0.15)'; // 연한 회색
+      return '#5856D61F'; // 선택 안함
   }
 };
+
+const getTextColorForCase = weightCase => {
+  switch (weightCase) {
+    case 'empty_stomach':
+      return '#007AFF'; // Blue for empty stomach (공복)
+    case 'after_meal':
+      return '#34C759'; // Green for after meal (식사 후)
+    case 'after_workout':
+      return '#FF9500'; // Orange for after workout (운동 후)
+    default:
+      return '#5856D6'; // Purple for default/not selected
+  }
+};
+
 const CustomDay = ({date, state, marking, onPress, weights}) => {
   const isSelected = marking?.selected;
   const isToday = state === 'today';
   const hasWeights = weights && weights.length > 0;
+
+  // Generate a lighter background for the date container when it has weights
+  const dateBgColor = 'transparent';
+
+  // Check if today's date should be highlighted (today is 18 in the screenshot)
+  const isHighlightedToday = isToday && !isSelected;
 
   return (
     <TouchableOpacity
@@ -27,7 +47,7 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
       <View
         style={[
           styles.dayContainer,
-          isToday && styles.todayContainer,
+          {backgroundColor: dateBgColor},
           isSelected && styles.selectedDayContainer,
         ]}>
         <Text
@@ -35,16 +55,10 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
             styles.dayText,
             state === 'disabled' && styles.disabledText,
             isSelected && styles.selectedDayText,
+            isHighlightedToday && styles.highlightedTodayText,
           ]}>
           {date.day}
         </Text>
-
-        {/* 3개 초과하는 기록이 있을 경우에만 +N 뱃지 표시 */}
-        {hasWeights && weights.length > 3 && (
-          <View style={styles.countBadge}>
-            <Text style={styles.countText}>+{weights.length - 3}</Text>
-          </View>
-        )}
 
         {/* 체중 기록 목록 */}
         {hasWeights && (
@@ -59,12 +73,20 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
                 <Text
                   style={[
                     styles.weightText,
-                    isSelected && styles.selectedDayText,
+                    {color: getTextColorForCase(weight.case)},
+                    isSelected && styles.selectedWeightText,
                   ]}>
                   {weight.weight.toFixed(1)}
                 </Text>
               </View>
             ))}
+          </View>
+        )}
+
+        {/* 3개 초과하는 기록이 있을 경우에만 +N 뱃지 표시 */}
+        {hasWeights && weights.length > 3 && (
+          <View style={styles.countBadge}>
+            <Text style={styles.countText}>+{weights.length - 3}</Text>
           </View>
         )}
       </View>
@@ -74,70 +96,72 @@ const CustomDay = ({date, state, marking, onPress, weights}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: '100%',
-    minHeight: 75,
-    padding: 2,
+    aspectRatio: 0.65,
+    padding: 1,
   },
   dayContainer: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: 4,
-    paddingVertical: 4,
+    justifyContent: 'top',
+    borderRadius: 6,
+    padding: 2,
+    position: 'relative',
   },
   selectedDayContainer: {
-    backgroundColor: '#4ecdc4',
-    width: '100%',
-    height: '100%',
-  },
-  todayContainer: {
-    borderWidth: 1,
-    borderColor: '#4ecdc4',
+    backgroundColor: '#FFE87940',
   },
   dayText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#0d1b1a',
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#555',
     marginBottom: 2,
+    textAlign: 'center',
   },
   disabledText: {
-    color: '#99a3a2',
+    color: '#cccccc',
   },
   selectedDayText: {
-    color: '#0d1b1a',
-    fontWeight: '600',
+    fontWeight: '500',
+  },
+  highlightedTodayText: {
+    color: '#ff6b6b',
+    fontWeight: '700',
   },
   weightsContainer: {
     width: '100%',
     alignItems: 'center',
-    gap: 1,
-    paddingHorizontal: 2,
-    paddingTop: 1,
+    gap: 2,
+    paddingTop: 2,
   },
   weightBox: {
-    width: '100%',
-    paddingVertical: 1,
-    borderRadius: 2,
+    width: '90%',
+    paddingVertical: 1.5,
+    paddingHorizontal: 2,
+    borderRadius: 4,
     alignItems: 'center',
   },
   weightText: {
-    fontSize: 10,
-    color: '#0d1b1a',
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  selectedWeightText: {
+    fontWeight: '600',
   },
   countBadge: {
     position: 'absolute',
     top: 2,
     right: 2,
-    backgroundColor: 'rgba(78, 205, 196, 0.8)',
-    borderRadius: 6,
-    minWidth: 12,
-    height: 12,
+    backgroundColor: '#FF9500',
+    borderRadius: 7,
+    minWidth: 14,
+    height: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 2,
+    paddingHorizontal: 0,
   },
   countText: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#fff',
     fontWeight: '600',
   },

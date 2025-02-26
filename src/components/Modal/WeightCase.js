@@ -1,43 +1,60 @@
+// src/components/Modal/WeightCase.js
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {COLORS} from './styles';
 import {WEIGHT_CASES} from './constants';
 
 const WeightCase = ({selectedCase, onSelectCase}) => {
-  const getBackgroundColor = caseId => {
+  const getStyle = caseId => {
     switch (caseId) {
       case 'empty_stomach':
-        return 'rgba(78, 205, 196, 0.15)';
+        return {
+          backgroundColor: selectedCase === caseId ? '#E8F7F4' : 'transparent',
+          borderColor: '#4ECDC4',
+          textColor: selectedCase === caseId ? '#4ECDC4' : '#333',
+        };
       case 'after_meal':
-        return 'rgba(255, 155, 155, 0.15)';
+        return {
+          backgroundColor: selectedCase === caseId ? '#FFF8F8' : 'transparent',
+          borderColor: '#FF9B9B',
+          textColor: selectedCase === caseId ? '#FF6B6B' : '#333',
+        };
       case 'after_workout':
-        return 'rgba(255, 183, 77, 0.15)';
+        return {
+          backgroundColor: selectedCase === caseId ? '#FFF9F5' : 'transparent',
+          borderColor: '#FFB74D',
+          textColor: selectedCase === caseId ? '#FF9800' : '#333',
+        };
       default:
-        return 'rgba(200, 200, 200, 0.15)';
+        return {
+          backgroundColor: selectedCase === caseId ? '#F8F9FA' : 'transparent',
+          borderColor: '#DDD',
+          textColor: selectedCase === caseId ? '#666' : '#333',
+        };
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.buttonsContainer}>
-        {Object.values(WEIGHT_CASES).map(caseItem => (
-          <TouchableOpacity
-            key={caseItem.id}
-            style={[
-              styles.button,
-              {backgroundColor: getBackgroundColor(caseItem.id)},
-              selectedCase === caseItem.id && styles.selectedButton,
-            ]}
-            onPress={() => onSelectCase(caseItem.id)}>
-            <Text
+        {Object.values(WEIGHT_CASES).map(caseItem => {
+          const caseStyle = getStyle(caseItem.id);
+          return (
+            <TouchableOpacity
+              key={caseItem.id}
               style={[
-                styles.buttonText,
-                selectedCase === caseItem.id && styles.selectedButtonText,
-              ]}>
-              {caseItem.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+                styles.button,
+                {
+                  backgroundColor: caseStyle.backgroundColor,
+                  borderColor: caseStyle.borderColor,
+                },
+              ]}
+              onPress={() => onSelectCase(caseItem.id)}>
+              <Text style={[styles.buttonText, {color: caseStyle.textColor}]}>
+                {caseItem.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -50,29 +67,21 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 10,
   },
   button: {
-    width: '48%', // 2개씩 배치
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 24,
+    backgroundColor: 'white',
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selectedButton: {
-    backgroundColor: COLORS.white,
-  },
   buttonText: {
-    color: COLORS.white,
     fontSize: 14,
     fontWeight: '600',
-  },
-  selectedButtonText: {
-    color: COLORS.primary,
   },
 });
 
