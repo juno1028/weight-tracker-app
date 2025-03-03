@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
+  Alert,
 } from 'react-native';
 import {CalendarList} from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -33,6 +34,7 @@ const WeightCalendar = ({
   selectedDate,
   weightEntries,
   onMonthChange,
+  isSubscribed,
 }) => {
   // 모든 케이스를 기본적으로 활성화
   const [activeFilters, setActiveFilters] = useState(
@@ -52,10 +54,21 @@ const WeightCalendar = ({
   const handleMonthChange = direction => {
     const newDate = new Date(currentDate);
     if (direction === 'prev') {
+      // Check for 3-month restriction
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      threeMonthsAgo.setDate(1); // First day of that month
+
       newDate.setMonth(newDate.getMonth() - 1);
+
+      if (!isSubscribed && newDate < threeMonthsAgo) {
+        showSubscriptionAlert();
+        return;
+      }
     } else {
       newDate.setMonth(newDate.getMonth() + 1);
     }
+
     setCurrentDate(newDate);
     if (calendarRef.current && calendarRef.current.scrollToMonth) {
       calendarRef.current.scrollToMonth(newDate);
@@ -63,6 +76,19 @@ const WeightCalendar = ({
     if (onMonthChange) {
       onMonthChange(newDate);
     }
+  };
+
+  const showSubscriptionAlert = () => {
+    Alert.alert(
+      '프리미엄 기능',
+      '3개월 이전의 데이터는 프리미엄 회원만 이용할 수 있습니다.',
+      [
+        {
+          text: '확인',
+          style: 'cancel',
+        },
+      ],
+    );
   };
 
   const toggleFilter = filterId => {
@@ -123,27 +149,27 @@ const WeightCalendar = ({
     const isActive = activeFilters.includes(caseId);
     switch (caseId) {
       case 'empty_stomach':
-        return isActive ? 'rgba(0,122,255,0.15)' : 'rgba(0,122,255,0.05)';
+        return isActive ? '#007AFF66' : '#007AFF33';
       case 'after_meal':
-        return isActive ? 'rgba(52,199,89,0.15)' : 'rgba(52,199,89,0.05)';
+        return isActive ? '#34C75966' : '#34C75933';
       case 'after_workout':
-        return isActive ? 'rgba(255,149,0,0.15)' : 'rgba(255,149,0,0.05)';
+        return isActive ? '#FF950066' : '#FF950033';
       default:
-        return isActive ? 'rgba(88,86,214,0.15)' : 'rgba(88,86,214,0.05)';
+        return isActive ? '#5856D666' : '#5856D633';
     }
   };
 
-  const getSolidFilterColor = caseId => {
+  const getTextColorForCase = caseId => {
     const isActive = activeFilters.includes(caseId);
     switch (caseId) {
       case 'empty_stomach':
-        return isActive ? '#007AFF' : '#99C2FF'; // Blue - normal/lighter
+        return isActive ? '#007AFF' : '#99C2FF';
       case 'after_meal':
-        return isActive ? '#34C759' : '#A8E9BC'; // Green - normal/lighter
+        return isActive ? '#34C759' : '#A8E9BC';
       case 'after_workout':
-        return isActive ? '#FF9500' : '#FFCB80'; // Orange - normal/lighter
+        return isActive ? '#FF9500' : '#FFCB80';
       default:
-        return isActive ? '#5856D6' : '#BEBDEA'; // Purple - normal/lighter
+        return isActive ? '#5856D6' : '#BEBDEA';
     }
   };
 
@@ -184,7 +210,21 @@ const WeightCalendar = ({
         futureScrollRange={24}
         style={styles.calendar}
         current={currentDate}
-        onDayPress={onDayPress}
+        onDayPress={day => {
+          // Check for 3-month restriction
+          const selectedDate = day.dateString;
+          const selectedDateTime = new Date(selectedDate);
+          const threeMonthsAgo = new Date();
+          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+          threeMonthsAgo.setHours(0, 0, 0, 0);
+
+          if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
+            showSubscriptionAlert();
+            return;
+          }
+
+          onDayPress(day);
+        }}
         markedDates={getMarkedDates()}
         firstDay={0} // Start with Sunday
         hideArrows // Hide default arrows
@@ -195,7 +235,21 @@ const WeightCalendar = ({
             date={date}
             state={state}
             marking={marking}
-            onPress={() => onDayPress(date)}
+            onPress={() => {
+              // Check 3-month restriction here too
+              const selectedDate = date.dateString;
+              const selectedDateTime = new Date(selectedDate);
+              const threeMonthsAgo = new Date();
+              threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+              threeMonthsAgo.setHours(0, 0, 0, 0);
+
+              if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
+                showSubscriptionAlert();
+                return;
+              }
+
+              onDayPress({...date, dateString: date.dateString});
+            }}
             weights={marking?.weights}
           />
         )}
@@ -226,6 +280,22 @@ const WeightCalendar = ({
           },
         }}
         onMonthChange={month => {
+          // Check 3-month restriction for month changes via swipe
+          const newDate = new Date(month.dateString);
+          const threeMonthsAgo = new Date();
+          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+          threeMonthsAgo.setDate(1); // First day of that month
+
+          if (!isSubscribed && newDate < threeMonthsAgo) {
+            // Scroll back to allowed date
+            const allowedDate = new Date(threeMonthsAgo);
+            if (calendarRef.current && calendarRef.current.scrollToMonth) {
+              calendarRef.current.scrollToMonth(allowedDate);
+            }
+            showSubscriptionAlert();
+            return;
+          }
+
           setCurrentDate(new Date(month.dateString));
           if (onMonthChange) {
             onMonthChange(new Date(month.dateString));
@@ -238,7 +308,7 @@ const WeightCalendar = ({
         <View style={styles.filterRow}>
           {Object.values(WEIGHT_CASES).map(caseItem => {
             const isPressed = pressedFilter === caseItem.id;
-            // const solidColor = getSolidFilterColor(caseItem.id);
+            const isActive = activeFilters.includes(caseItem.id);
             return (
               <TouchableOpacity
                 key={caseItem.id}
@@ -256,10 +326,7 @@ const WeightCalendar = ({
                 <Text
                   style={[
                     styles.filterText,
-                    isPressed,
-                    {
-                      color: getSolidFilterColor(caseItem.id),
-                    },
+                    {color: getTextColorForCase(caseItem.id)},
                   ]}>
                   {caseItem.label}
                 </Text>
@@ -350,7 +417,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
     borderRadius: 8,
   },
   filterButtonPressed: {

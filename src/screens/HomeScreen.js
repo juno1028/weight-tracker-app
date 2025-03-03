@@ -12,8 +12,10 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WeightCalendar from '../components/WeightCalendar';
 import WeightInputModal from '../components/Modal';
+import Advertisement from '../components/Advertisement';
 import {useWeight} from '../contexts/WeightContext';
 import {useUser} from '../contexts/UserContext';
+import {useSubscription} from '../contexts/SubscriptionContext';
 import {WEIGHT_CASES} from '../components/Modal/constants';
 import AnimatedWeightCard from '../components/AnimatedWeightCard';
 
@@ -21,6 +23,7 @@ const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const {weightEntries, setWeightEntries} = useWeight();
   const {weight: userWeight, updateUserData} = useUser();
+  const {isSubscribed, handlePurchase} = useSubscription();
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0],
   );
@@ -46,6 +49,20 @@ const HomeScreen = () => {
     return userWeight || 67.5;
   };
 
+  // Check if selected date is earlier than 3 months ago (for non-pro users)
+  const isThreeMonthsRestricted = () => {
+    if (isSubscribed) return false;
+
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    threeMonthsAgo.setHours(0, 0, 0, 0);
+
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setHours(0, 0, 0, 0);
+
+    return selectedDateTime < threeMonthsAgo;
+  };
+
   const handleAddPress = () => {
     const selectedDateTime = new Date(selectedDate);
     const today = new Date();
@@ -56,6 +73,13 @@ const HomeScreen = () => {
       Alert.alert('날짜 확인', '오늘 이후의 날짜는 입력할 수 없습니다.');
       return;
     }
+
+    // Check for 3-month restriction
+    if (isThreeMonthsRestricted()) {
+      showSubscriptionAlert();
+      return;
+    }
+
     setEditingEntry(null);
     setInitialModalWeight(getInitialWeight());
     setIsModalVisible(true);
@@ -70,6 +94,12 @@ const HomeScreen = () => {
   };
 
   const handleEditPress = entry => {
+    // Check for 3-month restriction
+    if (isThreeMonthsRestricted()) {
+      showSubscriptionAlert();
+      return;
+    }
+
     setEditingEntry(entry);
     setInitialModalWeight(entry.weight);
     setIsModalVisible(true);
@@ -125,7 +155,40 @@ const HomeScreen = () => {
   };
 
   const onDayPress = day => {
-    setSelectedDate(day.dateString);
+    // Check for 3-month restriction when changing date
+    const selectedDate = day.dateString;
+    const selectedDateTime = new Date(selectedDate);
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    threeMonthsAgo.setHours(0, 0, 0, 0);
+
+    if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
+      showSubscriptionAlert();
+      return;
+    }
+
+    setSelectedDate(selectedDate);
+  };
+
+  const showSubscriptionAlert = () => {
+    Alert.alert(
+      '프리미엄 기능',
+      '3개월 이전의 데이터는 프리미엄 회원만 이용할 수 있습니다. 지금 업그레이드하시겠습니까?',
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '업그레이드',
+          onPress: handlePurchase,
+        },
+      ],
+    );
+  };
+
+  const handleUpgrade = () => {
+    handlePurchase();
   };
 
   // Get case name in Korean
@@ -210,14 +273,19 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
+        {/* Advertisement Banner (only for non-pro users) */}
+        <Advertisement onUpgrade={handleUpgrade} />
+
         {/* Calendar Section */}
         <View style={styles.calendarSection}>
           <WeightCalendar
             onDayPress={onDayPress}
             selectedDate={selectedDate}
             weightEntries={weightEntries}
+            isSubscribed={isSubscribed}
           />
         </View>
+
         {/* Weight List Section */}
         <View style={styles.weightCardsSection}>
           {selectedEntries.length > 0 ? (

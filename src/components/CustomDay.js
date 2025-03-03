@@ -2,29 +2,29 @@
 import React from 'react';
 import {TouchableOpacity, Text, View, StyleSheet} from 'react-native';
 
-const getStatusColor = weightCase => {
-  switch (weightCase) {
-    case 'empty_stomach':
-      return '#007AFF1F'; // 공복
-    case 'after_meal':
-      return '#34C7591F'; // 식사 후
-    case 'after_workout':
-      return '#FF95001F'; // 운동 후
-    default:
-      return '#5856D61F'; // 선택 안함
-  }
-};
-
 const getTextColorForCase = weightCase => {
   switch (weightCase) {
     case 'empty_stomach':
-      return '#007AFF'; // Blue for empty stomach (공복)
+      return '#d9ebff'; // 공복
     case 'after_meal':
-      return '#34C759'; // Green for after meal (식사 후)
+      return '#e1f7e6'; // 식사 후
     case 'after_workout':
-      return '#FF9500'; // Orange for after workout (운동 후)
+      return '#ffeed9'; // 운동 후
     default:
-      return '#5856D6'; // Purple for default/not selected
+      return '#e6e6f9'; // 선택 안함
+  }
+};
+
+const getStatusColor = weightCase => {
+  switch (weightCase) {
+    case 'empty_stomach':
+      return '#3395FF'; // Lighter blue for empty stomach
+    case 'after_meal':
+      return '#5DD27A'; // Lighter green for after meal
+    case 'after_workout':
+      return '#FFAA33'; // Lighter orange for after workout
+    default:
+      return '#7978DE'; // Lighter purple for default/not selected
   }
 };
 
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: '600',
     color: '#555',
     marginBottom: 2,
     textAlign: 'center',
@@ -122,11 +122,11 @@ const styles = StyleSheet.create({
     color: '#cccccc',
   },
   selectedDayText: {
-    fontWeight: '500',
+    fontWeight: '800',
   },
   highlightedTodayText: {
     color: '#ff6b6b',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   weightsContainer: {
     width: '100%',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   weightText: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   selectedWeightText: {
     fontWeight: '600',

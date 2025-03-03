@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeScreen from './src/screens/HomeScreen';
-import StatsScreen from './src/screens/StatsScreen';
+// import StatsScreen from './src/screens/StatsScreen'; // Commented out Stats screen
 import BMIScreen from './src/screens/BMIScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import {WeightProvider} from './src/contexts/WeightContext';
@@ -19,7 +19,7 @@ const Tab = createBottomTabNavigator();
 const TabNavigator = ({isFirstLaunch, onComplete}) => (
   <Tab.Navigator
     screenOptions={{
-      tabBarActiveTintColor: '#4ecdc4',
+      tabBarActiveTintColor: '#FF9500', // Changed to orange
       tabBarInactiveTintColor: '#666',
       tabBarStyle: {
         borderTopWidth: 1,
@@ -37,6 +37,7 @@ const TabNavigator = ({isFirstLaunch, onComplete}) => (
         ),
       }}
     />
+    {/* Stats tab removed
     <Tab.Screen
       name="Stats"
       component={StatsScreen}
@@ -46,7 +47,7 @@ const TabNavigator = ({isFirstLaunch, onComplete}) => (
           <Icon name="chart-line" color={color} size={size} />
         ),
       }}
-    />
+    /> */}
     <Tab.Screen
       name="BMI"
       component={BMIScreen}

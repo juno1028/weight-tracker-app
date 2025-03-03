@@ -4,8 +4,7 @@ import {Dimensions} from 'react-native';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export const COLORS = {
-  // Lighter version of #FF9500
-  primary: '#FFC069',
+  primary: '#FF9500',
   white: '#ffffff',
   separator: 'rgba(255,255,255,0.1)',
   indicator: 'rgba(255, 149, 0, 0.5)',
