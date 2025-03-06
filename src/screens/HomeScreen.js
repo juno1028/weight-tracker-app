@@ -12,7 +12,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import WeightCalendar from '../components/WeightCalendar';
 import WeightInputModal from '../components/Modal';
-import Advertisement from '../components/Advertisement';
 import {useWeight} from '../contexts/WeightContext';
 import {useUser} from '../contexts/UserContext';
 import {useSubscription} from '../contexts/SubscriptionContext';
@@ -24,9 +23,18 @@ const HomeScreen = () => {
   const {weightEntries, setWeightEntries} = useWeight();
   const {weight: userWeight, updateUserData} = useUser();
   const {isSubscribed, handlePurchase} = useSubscription();
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0],
-  );
+
+  // Get today's date in YYYY-MM-DD format with timezone handling
+  const getTodayFormatted = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Initialize selectedDate with today's date
+  const [selectedDate, setSelectedDate] = useState(getTodayFormatted());
   const [editingEntry, setEditingEntry] = useState(null);
   const [initialModalWeight, setInitialModalWeight] = useState(67.5);
   const [selectedEntries, setSelectedEntries] = useState([]);
@@ -65,11 +73,11 @@ const HomeScreen = () => {
 
   const handleAddPress = () => {
     const selectedDateTime = new Date(selectedDate);
-    const today = new Date();
+    const todayDate = new Date();
     selectedDateTime.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
+    todayDate.setHours(0, 0, 0, 0);
 
-    if (selectedDateTime > today) {
+    if (selectedDateTime > todayDate) {
       Alert.alert('날짜 확인', '오늘 이후의 날짜는 입력할 수 없습니다.');
       return;
     }
@@ -264,17 +272,17 @@ const HomeScreen = () => {
   // Check if selected date is in the future
   const isSelectedDateInFuture = () => {
     const selectedDateTime = new Date(selectedDate);
-    const today = new Date();
+    const todayDate = new Date();
     selectedDateTime.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    return selectedDateTime > today;
+    todayDate.setHours(0, 0, 0, 0);
+    return selectedDateTime > todayDate;
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        {/* Advertisement Banner (only for non-pro users) */}
-        <Advertisement onUpgrade={handleUpgrade} />
+        {/* Advertisement Banner - commented out as requested */}
+        {/* <Advertisement onUpgrade={handleUpgrade} /> */}
 
         {/* Calendar Section */}
         <View style={styles.calendarSection}>
@@ -321,6 +329,8 @@ const HomeScreen = () => {
         activeOpacity={0.8}>
         <Icon name="plus" size={24} color="#ffffff" />
       </TouchableOpacity>
+
+      {/* Advertisement will be positioned here in future update */}
     </SafeAreaView>
   );
 };

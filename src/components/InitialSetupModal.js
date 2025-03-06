@@ -13,8 +13,13 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useUser} from '../contexts/UserContext';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useTranslation} from 'react-i18next';
+
+const PRIMARY_COLOR = '#FF9500'; // App's primary orange color
 
 const InitialSetupModal = ({isVisible, onComplete}) => {
+  const {t} = useTranslation();
   const [heightInput, setHeightInput] = useState('');
   const [weightInput, setWeightInput] = useState('');
   const {updateUserData} = useUser();
@@ -24,7 +29,7 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
     Keyboard.dismiss();
 
     if (!heightInput || !weightInput) {
-      Alert.alert('입력 오류', '키와 몸무게를 모두 입력해주세요.');
+      Alert.alert(t('initialSetup.inputError'), t('initialSetup.bothRequired'));
       return;
     }
 
@@ -32,17 +37,20 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
     const weightNum = parseFloat(weightInput);
 
     if (isNaN(heightNum) || isNaN(weightNum)) {
-      Alert.alert('입력 오류', '올바른 숫자를 입력해주세요.');
+      Alert.alert(
+        t('initialSetup.inputError'),
+        t('initialSetup.invalidNumber'),
+      );
       return;
     }
 
     if (heightNum < 100 || heightNum > 250) {
-      Alert.alert('입력 오류', '키는 100cm에서 250cm 사이여야 합니다.');
+      Alert.alert(t('initialSetup.inputError'), t('initialSetup.heightRange'));
       return;
     }
 
     if (weightNum < 20 || weightNum > 200) {
-      Alert.alert('입력 오류', '몸무게는 20kg에서 200kg 사이여야 합니다.');
+      Alert.alert(t('initialSetup.inputError'), t('initialSetup.weightRange'));
       return;
     }
 
@@ -53,7 +61,7 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
       onComplete(weightNum);
     } catch (error) {
       console.error('Failed to save user data:', error);
-      Alert.alert('오류', '데이터 저장에 실패했습니다.');
+      Alert.alert(t('common.error'), t('initialSetup.saveError'));
     }
   };
 
@@ -62,20 +70,23 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <SafeAreaView style={styles.container}>
           <View style={styles.content}>
-            <Text style={styles.title}>환영합니다!</Text>
-            <Text style={styles.subtitle}>
-              체중 관리를 시작하기 전에{'\n'}기본 정보를 입력해주세요
-            </Text>
+            <View style={styles.iconContainer}>
+              <Icon name="scale-bathroom" size={64} color="#FFFFFF" />
+            </View>
+
+            <Text style={styles.title}>{t('initialSetup.welcome')}</Text>
+            <Text style={styles.subtitle}>{t('initialSetup.subtitle')}</Text>
 
             <View style={styles.form}>
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>키</Text>
+                <Text style={styles.label}>{t('initialSetup.height')}</Text>
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
                     value={heightInput}
                     onChangeText={setHeightInput}
-                    placeholder="키를 입력하세요"
+                    placeholder={t('initialSetup.heightPlaceholder')}
+                    placeholderTextColor="#bbb"
                     keyboardType="decimal-pad"
                     maxLength={5}
                   />
@@ -84,13 +95,14 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>몸무게</Text>
+                <Text style={styles.label}>{t('initialSetup.weight')}</Text>
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={styles.input}
                     value={weightInput}
                     onChangeText={setWeightInput}
-                    placeholder="몸무게를 입력하세요"
+                    placeholder={t('initialSetup.weightPlaceholder')}
+                    placeholderTextColor="#bbb"
                     keyboardType="decimal-pad"
                     maxLength={5}
                   />
@@ -100,7 +112,7 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
             </View>
 
             <TouchableOpacity style={styles.button} onPress={handleComplete}>
-              <Text style={styles.buttonText}>시작하기</Text>
+              <Text style={styles.buttonText}>{t('initialSetup.start')}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -112,79 +124,99 @@ const InitialSetupModal = ({isVisible, onComplete}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1f8f8',
+    backgroundColor: PRIMARY_COLOR,
   },
   content: {
     flex: 1,
     padding: 24,
     justifyContent: 'center',
   },
+  iconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 24,
+  },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#0d1b1a',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 16,
+    fontFamily: 'System',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     marginBottom: 48,
-    lineHeight: 24,
+    lineHeight: 26,
+    fontFamily: 'System',
   },
   form: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 32,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
     marginBottom: 8,
+    fontWeight: '600',
+    fontFamily: 'System',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   input: {
     flex: 1,
-    height: 48,
-    fontSize: 16,
+    height: 56,
+    fontSize: 18,
     color: '#333',
+    fontFamily: 'System',
   },
   unit: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
     marginLeft: 8,
+    fontWeight: '500',
+    fontFamily: 'System',
   },
   button: {
-    backgroundColor: '#4ecdc4',
-    paddingVertical: 16,
+    backgroundColor: 'white',
+    paddingVertical: 18,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: PRIMARY_COLOR,
+    fontSize: 18,
+    fontWeight: '700',
     textAlign: 'center',
+    fontFamily: 'System',
   },
 });
 

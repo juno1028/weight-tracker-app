@@ -27,7 +27,7 @@ export const COMMON_STYLES = {
     justifyContent: 'center',
   },
   pickerItem: {
-    fontSize: 20,
+    fontSize: 18,
     color: COLORS.white,
   },
 };

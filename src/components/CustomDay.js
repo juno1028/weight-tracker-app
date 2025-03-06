@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   weightBox: {
-    width: '90%',
+    width: '100%',
     paddingVertical: 1.5,
     paddingHorizontal: 2,
     borderRadius: 4,

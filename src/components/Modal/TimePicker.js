@@ -29,7 +29,7 @@ const TimePicker = ({selectedHour, selectedMinute, onTimeChange}) => {
           style={styles.timePicker}
           selectedValue={selectedMinute}
           onValueChange={itemValue => onTimeChange(selectedHour, itemValue)}
-          itemStyle={COMMON_STYLES.pickerItemCustom}>
+          itemStyle={COMMON_STYLES.pickerItem}>
           {minutes.map(minute => (
             <Picker.Item
               key={minute}
@@ -48,17 +48,10 @@ const styles = StyleSheet.create({
   timePickerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   timePicker: {
     width: DIMENSIONS.pickerWidth,
     height: DIMENSIONS.pickerHeight,
-  },
-  pickerItemCustom: {
-    width: DIMENSIONS.pickerWidth,
-    marginHorizontal: 0,
-    padding: 0,
-    fontSize: 20,
   },
   timeSeparator: {
     color: COLORS.white,

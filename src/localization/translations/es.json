@@ -1,0 +1,83 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "ok": "Aceptar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "welcome": "¡Bienvenido!",
+    "settings": "Ajustes",
+    "home": "Inicio",
+    "bmi": "IMC",
+    "weight": "Peso"
+  },
+  "initialSetup": {
+    "welcome": "¡Bienvenido!",
+    "subtitle": "Por favor ingresa tu información básica\nantes de comenzar con el seguimiento de peso",
+    "height": "Altura",
+    "weight": "Peso",
+    "heightPlaceholder": "Ingresa tu altura",
+    "weightPlaceholder": "Ingresa tu peso",
+    "start": "Comenzar",
+    "inputError": "Error de entrada",
+    "bothRequired": "Debes ingresar tanto altura como peso.",
+    "invalidNumber": "Por favor ingresa números válidos.",
+    "heightRange": "La altura debe estar entre 100cm y 250cm.",
+    "weightRange": "El peso debe estar entre 20kg y 200kg.",
+    "saveError": "Error al guardar los datos."
+  },
+  "homeScreen": {
+    "noDataTitle": "No hay registros de peso",
+    "noDataSubtitle": "Por favor agrega tus registros de peso",
+    "dateError": "Verificación de fecha",
+    "futureDateError": "No puedes ingresar fechas posteriores a hoy.",
+    "limitError": "Límite de entradas",
+    "entryLimitError": "Solo puedes registrar hasta 5 entradas por día.",
+    "premium": "Función Premium",
+    "premiumRequired": "El acceso a datos de más de 3 meses requiere una suscripción premium. ¿Deseas actualizar ahora?",
+    "upgrade": "Actualizar"
+  },
+  "weightModal": {
+    "complete": "Completar",
+    "deleteConfirm": "Confirmar eliminación",
+    "deletePrompt": "¿Estás seguro de que deseas eliminar este registro?"
+  },
+  "weightCases": {
+    "empty_stomach": "Estómago vacío",
+    "after_meal": "Después de comer",
+    "after_workout": "Después de ejercicio",
+    "none": "Sin selección"
+  },
+  "bmiScreen": {
+    "title": "Índice de IMC",
+    "bmiUnit": "kg/m²",
+    "needInfo": "Se necesita información de altura y peso\nPor favor, ingrésala en ajustes",
+    "height": "Altura",
+    "weight": "Peso",
+    "currentRange": "Rango actual",
+    "bmiRanges": "Rangos de IMC",
+    "underweight": "Bajo peso",
+    "normal": "Normal",
+    "overweight": "Sobrepeso",
+    "obese": "Obesidad",
+    "severelyObese": "Obesidad severa"
+  },
+  "settingsScreen": {
+    "title": "Ajustes",
+    "profile": "Configuración de altura y peso",
+    "subscription": "Suscribirse",
+    "subscriptionActive": "Activa",
+    "subscriptionInactive": "Inactiva",
+    "deleteData": "Eliminar todos los datos",
+    "deleteConfirm": "Eliminar datos",
+    "deletePrompt": "Se eliminarán todos los registros de peso. ¿Deseas continuar?",
+    "deleteSuccess": "Todos los datos han sido eliminados.",
+    "deleteError": "Error al eliminar los datos.",
+    "language": "Configuración de idioma",
+    "appVersion": "Versión 1.0.0",
+    "saveSuccess": "Información corporal guardada."
+  }
+}

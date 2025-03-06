@@ -1,0 +1,83 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "ok": "확인",
+    "loading": "로딩중...",
+    "error": "오류",
+    "success": "성공",
+    "welcome": "환영합니다!",
+    "settings": "설정",
+    "home": "홈",
+    "bmi": "BMI",
+    "weight": "체중"
+  },
+  "initialSetup": {
+    "welcome": "환영합니다!",
+    "subtitle": "체중 관리를 시작하기 전에\n기본 정보를 입력해주세요",
+    "height": "키",
+    "weight": "몸무게",
+    "heightPlaceholder": "키를 입력하세요",
+    "weightPlaceholder": "몸무게를 입력하세요",
+    "start": "시작하기",
+    "inputError": "입력 오류",
+    "bothRequired": "키와 몸무게를 모두 입력해주세요.",
+    "invalidNumber": "올바른 숫자를 입력해주세요.",
+    "heightRange": "키는 100cm에서 250cm 사이여야 합니다.",
+    "weightRange": "몸무게는 20kg에서 200kg 사이여야 합니다.",
+    "saveError": "데이터 저장에 실패했습니다."
+  },
+  "homeScreen": {
+    "noDataTitle": "추가된 체중 기록이 없어요",
+    "noDataSubtitle": "체중 기록을 추가해주세요",
+    "dateError": "날짜 확인",
+    "futureDateError": "오늘 이후의 날짜는 입력할 수 없습니다.",
+    "limitError": "입력 제한",
+    "entryLimitError": "하루에 최대 5개까지 기록할 수 있습니다.",
+    "premium": "프리미엄 기능",
+    "premiumRequired": "3개월 이전의 데이터는 프리미엄 회원만 이용할 수 있습니다. 지금 업그레이드하시겠습니까?",
+    "upgrade": "업그레이드"
+  },
+  "weightModal": {
+    "complete": "완료",
+    "deleteConfirm": "삭제 확인",
+    "deletePrompt": "정말 삭제하시겠습니까?"
+  },
+  "weightCases": {
+    "empty_stomach": "공복",
+    "after_meal": "밥 먹은 후",
+    "after_workout": "운동한 후",
+    "none": "선택 안함"
+  },
+  "bmiScreen": {
+    "title": "BMI 지수",
+    "bmiUnit": "kg/m²",
+    "needInfo": "키와 몸무게 정보가 필요합니다\n설정에서 입력해주세요",
+    "height": "신장",
+    "weight": "체중",
+    "currentRange": "현재 범위",
+    "bmiRanges": "BMI 범위",
+    "underweight": "저체중",
+    "normal": "정상",
+    "overweight": "과체중",
+    "obese": "비만",
+    "severelyObese": "고도비만"
+  },
+  "settingsScreen": {
+    "title": "설정",
+    "profile": "키, 몸무게 설정",
+    "subscription": "구독하기",
+    "subscriptionActive": "사용중",
+    "subscriptionInactive": "미사용",
+    "deleteData": "데이터 모두 삭제하기",
+    "deleteConfirm": "데이터 삭제",
+    "deletePrompt": "모든 체중 기록이 삭제됩니다. 계속하시겠습니까?",
+    "deleteSuccess": "모든 데이터가 삭제되었습니다.",
+    "deleteError": "데이터 삭제에 실패했습니다.",
+    "language": "언어 설정",
+    "appVersion": "버전 1.0.0",
+    "saveSuccess": "신체 정보가 저장되었습니다."
+  }
+}

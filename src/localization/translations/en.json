@@ -1,0 +1,83 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "ok": "OK",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "welcome": "Welcome!",
+    "settings": "Settings",
+    "home": "Home",
+    "bmi": "BMI",
+    "weight": "Weight"
+  },
+  "initialSetup": {
+    "welcome": "Welcome!",
+    "subtitle": "Please enter your basic information\nbefore starting weight management",
+    "height": "Height",
+    "weight": "Weight",
+    "heightPlaceholder": "Enter your height",
+    "weightPlaceholder": "Enter your weight",
+    "start": "Get Started",
+    "inputError": "Input Error",
+    "bothRequired": "Both height and weight are required.",
+    "invalidNumber": "Please enter valid numbers.",
+    "heightRange": "Height must be between 100cm and 250cm.",
+    "weightRange": "Weight must be between 20kg and 200kg.",
+    "saveError": "Failed to save data."
+  },
+  "homeScreen": {
+    "noDataTitle": "No weight records added",
+    "noDataSubtitle": "Please add your weight records",
+    "dateError": "Date Check",
+    "futureDateError": "You cannot enter dates after today.",
+    "limitError": "Entry Limit",
+    "entryLimitError": "You can only record up to 5 entries per day.",
+    "premium": "Premium Feature",
+    "premiumRequired": "Access to data older than 3 months requires a premium subscription. Would you like to upgrade now?",
+    "upgrade": "Upgrade"
+  },
+  "weightModal": {
+    "complete": "Complete",
+    "deleteConfirm": "Confirm Delete",
+    "deletePrompt": "Are you sure you want to delete this entry?"
+  },
+  "weightCases": {
+    "empty_stomach": "Empty Stomach",
+    "after_meal": "After Meal",
+    "after_workout": "After Workout",
+    "none": "None"
+  },
+  "bmiScreen": {
+    "title": "BMI Index",
+    "bmiUnit": "kg/m²",
+    "needInfo": "Height and weight information needed\nPlease enter in settings",
+    "height": "Height",
+    "weight": "Weight",
+    "currentRange": "Current Range",
+    "bmiRanges": "BMI Ranges",
+    "underweight": "Underweight",
+    "normal": "Normal",
+    "overweight": "Overweight",
+    "obese": "Obese",
+    "severelyObese": "Severely Obese"
+  },
+  "settingsScreen": {
+    "title": "Settings",
+    "profile": "Height & Weight Settings",
+    "subscription": "Subscribe",
+    "subscriptionActive": "Active",
+    "subscriptionInactive": "Inactive",
+    "deleteData": "Delete All Data",
+    "deleteConfirm": "Delete Data",
+    "deletePrompt": "All weight records will be deleted. Do you want to continue?",
+    "deleteSuccess": "All data has been deleted.",
+    "deleteError": "Failed to delete data.",
+    "language": "Language Settings",
+    "appVersion": "Version 1.0.0",
+    "saveSuccess": "Body information has been saved."
+  }
+}

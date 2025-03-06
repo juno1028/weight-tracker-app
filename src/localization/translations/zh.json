@@ -1,0 +1,83 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "ok": "确定",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "welcome": "欢迎！",
+    "settings": "设置",
+    "home": "首页",
+    "bmi": "BMI",
+    "weight": "体重"
+  },
+  "initialSetup": {
+    "welcome": "欢迎！",
+    "subtitle": "在开始体重管理之前\n请输入您的基本信息",
+    "height": "身高",
+    "weight": "体重",
+    "heightPlaceholder": "请输入身高",
+    "weightPlaceholder": "请输入体重",
+    "start": "开始使用",
+    "inputError": "输入错误",
+    "bothRequired": "身高和体重都需要填写。",
+    "invalidNumber": "请输入有效的数字。",
+    "heightRange": "身高必须在100厘米到250厘米之间。",
+    "weightRange": "体重必须在20公斤到200公斤之间。",
+    "saveError": "保存数据失败。"
+  },
+  "homeScreen": {
+    "noDataTitle": "没有添加体重记录",
+    "noDataSubtitle": "请添加您的体重记录",
+    "dateError": "日期检查",
+    "futureDateError": "不能输入今天之后的日期。",
+    "limitError": "条目限制",
+    "entryLimitError": "每天最多只能记录5个条目。",
+    "premium": "高级功能",
+    "premiumRequired": "访问超过3个月的数据需要高级会员订阅。您想现在升级吗？",
+    "upgrade": "升级"
+  },
+  "weightModal": {
+    "complete": "完成",
+    "deleteConfirm": "确认删除",
+    "deletePrompt": "您确定要删除此记录吗？"
+  },
+  "weightCases": {
+    "empty_stomach": "空腹",
+    "after_meal": "饭后",
+    "after_workout": "运动后",
+    "none": "无选择"
+  },
+  "bmiScreen": {
+    "title": "BMI指数",
+    "bmiUnit": "kg/m²",
+    "needInfo": "需要身高和体重信息\n请在设置中输入",
+    "height": "身高",
+    "weight": "体重",
+    "currentRange": "当前范围",
+    "bmiRanges": "BMI范围",
+    "underweight": "体重过轻",
+    "normal": "正常",
+    "overweight": "超重",
+    "obese": "肥胖",
+    "severelyObese": "重度肥胖"
+  },
+  "settingsScreen": {
+    "title": "设置",
+    "profile": "身高和体重设置",
+    "subscription": "订阅",
+    "subscriptionActive": "已激活",
+    "subscriptionInactive": "未激活",
+    "deleteData": "删除所有数据",
+    "deleteConfirm": "删除数据",
+    "deletePrompt": "所有体重记录将被删除。您想继续吗？",
+    "deleteSuccess": "所有数据已被删除。",
+    "deleteError": "删除数据失败。",
+    "language": "语言设置",
+    "appVersion": "版本 1.0.0",
+    "saveSuccess": "身体信息已保存。"
+  }
+}
