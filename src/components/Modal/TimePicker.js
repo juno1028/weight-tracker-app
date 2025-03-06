@@ -55,8 +55,7 @@ const styles = StyleSheet.create({
   },
   timeSeparator: {
     color: COLORS.white,
-    fontSize: 24,
-    paddingHorizontal: 5,
+    fontSize: 18,
   },
 });
 

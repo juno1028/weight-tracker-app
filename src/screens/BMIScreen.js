@@ -1,4 +1,4 @@
-// Updated BMIScreen.js with consistent card styling
+// Updated BMIScreen.js with consistent card styling and reference section
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -182,6 +182,21 @@ const BMIScreen = () => {
             ))}
           </View>
         </View>
+
+        <View style={styles.citationContainer}>
+          <Text style={styles.citationTitle}>정보 출처</Text>
+          <Text style={styles.citationItem}>
+            BMI 계산 공식: 체중(kg) ÷ (신장(m))²
+          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL(
+                'https://www.cdc.gov/bmi/faq/?CDC_AAref_Val=https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html',
+              )
+            }>
+            <Text style={styles.linkText}>CDC – BMI 계산 방식 및 FAQ</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -357,6 +372,38 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  citationContainer: {
+    backgroundColor: 'white',
+    margin: 16,
+    marginTop: 8,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderLeftWidth: 6,
+    borderLeftColor: '#999',
+  },
+  citationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 12,
+  },
+  citationItem: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  linkText: {
+    fontSize: 14,
+    color: '#4A90E2',
+    textDecorationLine: 'underline',
+    marginTop: 4,
   },
 });
 

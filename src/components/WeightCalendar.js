@@ -1,4 +1,4 @@
-// src/components/WeightCalendar.js
+// src/components/WeightCalendar.js - Updated with proper weekday alignment
 import React, {useState, useRef, useEffect} from 'react';
 import {
   Dimensions,
@@ -14,6 +14,7 @@ import CustomDay from './CustomDay';
 import {WEIGHT_CASES} from './Modal/constants';
 
 const {width: screenWidth} = Dimensions.get('window');
+const CALENDAR_CELL_WIDTH = (screenWidth / 7) * 0.93;
 
 // Custom component for weekday headers
 const CustomWeekdaysHeader = () => {
@@ -21,9 +22,9 @@ const CustomWeekdaysHeader = () => {
   return (
     <View style={styles.weekdaysContainer}>
       {weekDays.map((day, index) => (
-        <Text key={index} style={styles.weekdayText}>
-          {day}
-        </Text>
+        <View key={index} style={styles.weekdayCell}>
+          <Text style={styles.weekdayText}>{day}</Text>
+        </View>
       ))}
     </View>
   );
@@ -393,18 +394,23 @@ const styles = StyleSheet.create({
   },
   weekdaysContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingBottom: 10,
+    justifyContent: 'center',
+    paddingBottom: 0,
     backgroundColor: 'white',
+  },
+  weekdayCell: {
+    width: CALENDAR_CELL_WIDTH,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   weekdayText: {
     fontSize: 12,
     color: '#ccc',
     textAlign: 'center',
-    width: screenWidth / 7,
   },
   filterContainer: {
-    padding: 10,
+    paddingHorizontal: 8,
+    paddingTop: 4,
   },
   filterRow: {
     flexDirection: 'row',

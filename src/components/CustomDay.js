@@ -105,11 +105,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'top',
     borderRadius: 6,
-    padding: 2,
+    paddingHorizontal: 2,
     position: 'relative',
   },
   selectedDayContainer: {
-    backgroundColor: '#FFE87940',
+    backgroundColor: '#FFFF33',
   },
   dayText: {
     fontSize: 12,

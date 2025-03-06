@@ -18,7 +18,7 @@ const WeightCase = ({selectedCase, onSelectCase}) => {
         };
       case 'after_workout':
         return {
-          backgroundColor: selectedCase === caseId ? '#FF95001F' : '#ffeed9',
+          backgroundColor: selectedCase === caseId ? '#ffc26d' : '#ffeed9',
           textColor: '#FF9500',
         };
       default:

@@ -19,7 +19,7 @@ export const COMMON_STYLES = {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRightWidth: 1,
+    // borderRightWidth: 1,
     borderRightColor: COLORS.separator,
   },
   pickerSide: {

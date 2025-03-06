@@ -14,6 +14,7 @@ const WeightPicker = ({selectedWeight, onWeightChange}) => {
     <View style={COMMON_STYLES.pickerSide}>
       <View style={styles.centerIndicator} />
       <Picker
+        style={styles.weightPicker}
         selectedValue={selectedWeight}
         onValueChange={onWeightChange}
         itemStyle={COMMON_STYLES.pickerItem}>
@@ -31,6 +32,9 @@ const WeightPicker = ({selectedWeight, onWeightChange}) => {
 };
 
 const styles = StyleSheet.create({
+  weightPicker: {
+    width: '100%',
+  },
   centerIndicator: {
     position: 'absolute',
     top: '50%',
