@@ -1,4 +1,4 @@
-// App.js
+// Updated App.js with splash screen integration
 import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -6,7 +6,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {I18nextProvider, useTranslation} from 'react-i18next';
 import setupI18n from './src/localization/i18n';
-import {View, ActivityIndicator, Text} from 'react-native';
+import {View, ActivityIndicator, Text, Image, StyleSheet} from 'react-native';
+import SplashScreen from 'react-native-splash-screen'; // Add this import
 
 import HomeScreen from './src/screens/HomeScreen';
 import BMIScreen from './src/screens/BMIScreen';
@@ -71,25 +72,14 @@ const TabNavigator = ({isFirstLaunch, onComplete}) => {
   );
 };
 
-// Loading screen component
+// Enhanced loading screen component with logo
 const LoadingScreen = () => (
-  <View
-    style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#FF9500',
-    }}>
-    <ActivityIndicator size="large" color="#FFFFFF" />
-    <Text
-      style={{
-        color: '#FFFFFF',
-        marginTop: 16,
-        fontSize: 18,
-        fontWeight: 'bold',
-      }}>
-      Loading...
-    </Text>
+  <View style={styles.loadingContainer}>
+    <View style={styles.logoContainer}>
+      <Icon name="scale-bathroom" size={80} color="#FFFFFF" />
+    </View>
+    <Text style={styles.appTitle}>체중 기록</Text>
+    <ActivityIndicator size="large" color="#FFFFFF" style={styles.spinner} />
   </View>
 );
 
@@ -99,7 +89,6 @@ const AppWrapper = () => {
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize app resources
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -114,6 +103,11 @@ const AppWrapper = () => {
         console.error('Failed to initialize app:', error);
       } finally {
         setIsLoading(false);
+
+        // Hide the native splash screen after our JS has loaded
+        if (SplashScreen) {
+          SplashScreen.hide();
+        }
       }
     };
 
@@ -145,6 +139,16 @@ const AppWrapper = () => {
 
 // Root component with all providers
 const App = () => {
+  // Hide the native splash screen after our components mount
+  useEffect(() => {
+    if (SplashScreen) {
+      // Give a small delay to ensure our JS has initialized
+      setTimeout(() => {
+        SplashScreen.hide();
+      }, 300);
+    }
+  }, []);
+
   return (
     <SubscriptionProvider>
       <UserProvider>
@@ -157,5 +161,32 @@ const App = () => {
     </SubscriptionProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FF9500',
+  },
+  logoContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  appTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 24,
+  },
+  spinner: {
+    marginTop: 16,
+  },
+});
 
 export default App;

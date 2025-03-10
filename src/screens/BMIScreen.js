@@ -1,4 +1,4 @@
-// Updated BMIScreen.js with consistent card styling and reference section
+// Updated BMIScreen.js with updated BMI criteria (no imperial units)
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -14,6 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useWeight} from '../contexts/WeightContext';
 import {useUser} from '../contexts/UserContext';
+import {useTranslation} from 'react-i18next';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const GAUGE_WIDTH = SCREEN_WIDTH - 64;
@@ -22,6 +23,7 @@ const PRIMARY_COLOR = '#FF9500';
 const MINT_COLOR = '#4ECDC4';
 
 const BMIScreen = () => {
+  const {t} = useTranslation();
   const {weightEntries} = useWeight();
   const {height, weight} = useUser();
   const [bmiAnimation] = useState(new Animated.Value(0));
@@ -46,15 +48,36 @@ const BMIScreen = () => {
   };
 
   const getBMICategory = bmi => {
+    // Using WHO international BMI classification
     if (bmi < 18.5)
-      return {category: '저체중', color: '#4A90E2', range: '18.5 미만'};
-    if (bmi < 23)
-      return {category: '정상', color: '#4ECDC4', range: '18.5 ~ 22.9'};
+      return {
+        category: t('bmiScreen.underweight'),
+        color: '#4A90E2',
+        range: '< 18.5',
+      };
     if (bmi < 25)
-      return {category: '과체중', color: '#FFB74D', range: '23 ~ 24.9'};
+      return {
+        category: t('bmiScreen.normal'),
+        color: '#4ECDC4',
+        range: '18.5 - 24.9',
+      };
     if (bmi < 30)
-      return {category: '비만', color: '#FF9B9B', range: '25 ~ 29.9'};
-    return {category: '고도비만', color: '#FF6B6B', range: '30 이상'};
+      return {
+        category: t('bmiScreen.overweight'),
+        color: '#FFB74D',
+        range: '25 - 29.9',
+      };
+    if (bmi < 35)
+      return {
+        category: t('bmiScreen.obese'),
+        color: '#FF9B9B',
+        range: '30 - 34.9',
+      };
+    return {
+      category: t('bmiScreen.severelyObese'),
+      color: '#FF6B6B',
+      range: '≥ 35',
+    };
   };
 
   const bmi = calculateBMI();
@@ -78,13 +101,11 @@ const BMIScreen = () => {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>BMI 지수</Text>
+            <Text style={styles.headerTitle}>{t('bmiScreen.title')}</Text>
           </View>
           <View style={styles.noDataContainer}>
             <Icon name="scale-bathroom" size={48} color="#ccc" />
-            <Text style={styles.noDataText}>
-              키와 몸무게 정보가 필요합니다{'\n'}설정에서 입력해주세요
-            </Text>
+            <Text style={styles.noDataText}>{t('bmiScreen.needInfo')}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -95,14 +116,14 @@ const BMIScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>BMI 지수</Text>
+          <Text style={styles.headerTitle}>{t('bmiScreen.title')}</Text>
         </View>
 
         <View style={[styles.card, styles.mainCard]}>
           <View style={styles.bmiContainer}>
             <View style={styles.bmiValueContainer}>
               <Text style={styles.bmiValue}>{bmi}</Text>
-              <Text style={styles.bmiUnit}>kg/m²</Text>
+              <Text style={styles.bmiUnit}>{t('bmiScreen.bmiUnit')}</Text>
             </View>
             <Text style={[styles.bmiCategory, {color: bmiInfo.color}]}>
               {bmiInfo.category}
@@ -129,26 +150,30 @@ const BMIScreen = () => {
               <View style={[styles.marker, {left: '75%'}]} />
             </View>
             <View style={styles.gaugeLabels}>
-              <Text style={styles.gaugeLabel}>저체중</Text>
-              <Text style={styles.gaugeLabel}>정상</Text>
-              <Text style={styles.gaugeLabel}>과체중</Text>
-              <Text style={styles.gaugeLabel}>비만</Text>
-              <Text style={styles.gaugeLabel}>고도비만</Text>
+              <Text style={styles.gaugeLabel}>
+                {t('bmiScreen.underweight')}
+              </Text>
+              <Text style={styles.gaugeLabel}>{t('bmiScreen.normal')}</Text>
+              <Text style={styles.gaugeLabel}>{t('bmiScreen.overweight')}</Text>
+              <Text style={styles.gaugeLabel}>{t('bmiScreen.obese')}</Text>
+              <Text style={styles.gaugeLabel}>
+                {t('bmiScreen.severelyObese')}
+              </Text>
             </View>
           </View>
         </View>
 
         <View style={[styles.card, styles.infoCard]}>
           <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>신장</Text>
+            <Text style={styles.infoLabel}>{t('bmiScreen.height')}</Text>
             <Text style={styles.infoValue}>{height} cm</Text>
           </View>
           <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>체중</Text>
+            <Text style={styles.infoLabel}>{t('bmiScreen.weight')}</Text>
             <Text style={styles.infoValue}>{latestWeight} kg</Text>
           </View>
           <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>현재 범위</Text>
+            <Text style={styles.infoLabel}>{t('bmiScreen.currentRange')}</Text>
             <Text style={[styles.infoRangeValue, {color: bmiInfo.color}]}>
               {bmiInfo.range}
             </Text>
@@ -156,14 +181,34 @@ const BMIScreen = () => {
         </View>
 
         <View style={[styles.card, styles.rangeCard]}>
-          <Text style={styles.sectionTitle}>BMI 범위</Text>
+          <Text style={styles.sectionTitle}>{t('bmiScreen.bmiRanges')}</Text>
           <View style={styles.bmiRangeList}>
             {[
-              {label: '저체중', range: '18.5 미만', color: '#4A90E2'},
-              {label: '정상', range: '18.5 ~ 22.9', color: '#4ECDC4'},
-              {label: '과체중', range: '23 ~ 24.9', color: '#FFB74D'},
-              {label: '비만', range: '25 ~ 29.9', color: '#FF9B9B'},
-              {label: '고도비만', range: '30 이상', color: '#FF6B6B'},
+              {
+                label: t('bmiScreen.underweight'),
+                range: '< 18.5',
+                color: '#4A90E2',
+              },
+              {
+                label: t('bmiScreen.normal'),
+                range: '18.5 - 24.9',
+                color: '#4ECDC4',
+              },
+              {
+                label: t('bmiScreen.overweight'),
+                range: '25 - 29.9',
+                color: '#FFB74D',
+              },
+              {
+                label: t('bmiScreen.obese'),
+                range: '30 - 34.9',
+                color: '#FF9B9B',
+              },
+              {
+                label: t('bmiScreen.severelyObese'),
+                range: '≥ 35',
+                color: '#FF6B6B',
+              },
             ].map((item, index) => (
               <View
                 key={item.label}
@@ -184,17 +229,15 @@ const BMIScreen = () => {
         </View>
 
         <View style={styles.citationContainer}>
-          <Text style={styles.citationTitle}>정보 출처</Text>
-          <Text style={styles.citationItem}>
-            BMI 계산 공식: 체중(kg) ÷ (신장(m))²
-          </Text>
+          <Text style={styles.citationTitle}>{t('bmiScreen.citation')}</Text>
+          <Text style={styles.citationItem}>{t('bmiScreen.formula')}</Text>
           <TouchableOpacity
             onPress={() =>
               Linking.openURL(
                 'https://www.cdc.gov/bmi/faq/?CDC_AAref_Val=https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html',
               )
             }>
-            <Text style={styles.linkText}>CDC – BMI 계산 방식 및 FAQ</Text>
+            <Text style={styles.linkText}>{t('bmiScreen.cdcLink')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

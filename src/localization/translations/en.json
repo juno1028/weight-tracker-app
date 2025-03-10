@@ -63,7 +63,10 @@
     "normal": "Normal",
     "overweight": "Overweight",
     "obese": "Obese",
-    "severelyObese": "Severely Obese"
+    "severelyObese": "Severely Obese",
+    "citation": "Information Source",
+    "formula": "BMI Formula: Weight(kg) ÷ (Height(m))²",
+    "cdcLink": "CDC - BMI Calculation Method & FAQ"
   },
   "settingsScreen": {
     "title": "Settings",

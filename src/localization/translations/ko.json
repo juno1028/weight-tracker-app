@@ -63,7 +63,10 @@
     "normal": "정상",
     "overweight": "과체중",
     "obese": "비만",
-    "severelyObese": "고도비만"
+    "severelyObese": "고도비만",
+    "citation": "정보 출처",
+    "formula": "BMI 계산 공식: 체중(kg) ÷ (신장(m))²",
+    "cdcLink": "CDC – BMI 계산 방식 및 FAQ"
   },
   "settingsScreen": {
     "title": "설정",

@@ -7,23 +7,17 @@ import {I18nManager, NativeModules, Platform} from 'react-native';
 // Import language resources
 import translationEN from './translations/en.json';
 import translationKO from './translations/ko.json';
-import translationES from './translations/es.json';
-import translationZH from './translations/zh.json';
 
 // Language codes
 export const languageCodes = {
   ENGLISH: 'en',
   KOREAN: 'ko',
-  SPANISH: 'es',
-  CHINESE: 'zh',
 };
 
 // Flag emoji and language names in their native scripts
 export const languageDetails = {
   en: {name: 'English', flag: '🇺🇸'},
   ko: {name: '한국어', flag: '🇰🇷'},
-  es: {name: 'Español', flag: '🇪🇸'},
-  zh: {name: '中文', flag: '🇨🇳'},
 };
 
 const resources = {
@@ -32,12 +26,6 @@ const resources = {
   },
   [languageCodes.KOREAN]: {
     translation: translationKO,
-  },
-  [languageCodes.SPANISH]: {
-    translation: translationES,
-  },
-  [languageCodes.CHINESE]: {
-    translation: translationZH,
   },
 };
 

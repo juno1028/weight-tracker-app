@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   selectedDayContainer: {
-    backgroundColor: '#FFFF33',
+    backgroundColor: '#FFF9C4',
   },
   dayText: {
     fontSize: 12,

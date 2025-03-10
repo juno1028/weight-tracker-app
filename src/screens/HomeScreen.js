@@ -17,8 +17,10 @@ import {useUser} from '../contexts/UserContext';
 import {useSubscription} from '../contexts/SubscriptionContext';
 import {WEIGHT_CASES} from '../components/Modal/constants';
 import AnimatedWeightCard from '../components/AnimatedWeightCard';
+import {useTranslation} from 'react-i18next';
 
 const HomeScreen = () => {
+  const {t} = useTranslation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const {weightEntries, setWeightEntries} = useWeight();
   const {weight: userWeight, updateUserData} = useUser();
@@ -78,7 +80,7 @@ const HomeScreen = () => {
     todayDate.setHours(0, 0, 0, 0);
 
     if (selectedDateTime > todayDate) {
-      Alert.alert('날짜 확인', '오늘 이후의 날짜는 입력할 수 없습니다.');
+      Alert.alert(t('homeScreen.dateError'), t('homeScreen.futureDateError'));
       return;
     }
 
@@ -118,7 +120,7 @@ const HomeScreen = () => {
     selectedTime,
     selectedCase,
   ) => {
-    setIsModalVisible(false); // 먼저 모달을 닫습니다.
+    setIsModalVisible(false); // Close modal first
     if (editingEntry) {
       const updatedEntries = weightEntries.map(entry =>
         entry.timestamp === editingEntry.timestamp
@@ -137,9 +139,11 @@ const HomeScreen = () => {
         entry => entry.date === selectedDate,
       );
       if (existingEntries.length >= 5) {
-        Alert.alert('입력 제한', '하루에 최대 5개까지 기록할 수 있습니다.', [
-          {text: '확인'},
-        ]);
+        Alert.alert(
+          t('homeScreen.limitError'),
+          t('homeScreen.entryLimitError'),
+          [{text: t('common.ok')}],
+        );
         return;
       }
       const newEntry = {
@@ -179,30 +183,26 @@ const HomeScreen = () => {
   };
 
   const showSubscriptionAlert = () => {
-    Alert.alert(
-      '프리미엄 기능',
-      '3개월 이전의 데이터는 프리미엄 회원만 이용할 수 있습니다. 지금 업그레이드하시겠습니까?',
-      [
-        {
-          text: '취소',
-          style: 'cancel',
-        },
-        {
-          text: '업그레이드',
-          onPress: handlePurchase,
-        },
-      ],
-    );
+    Alert.alert(t('homeScreen.premium'), t('homeScreen.premiumRequired'), [
+      {
+        text: t('common.cancel'),
+        style: 'cancel',
+      },
+      {
+        text: t('homeScreen.upgrade'),
+        onPress: handlePurchase,
+      },
+    ]);
   };
 
   const handleUpgrade = () => {
     handlePurchase();
   };
 
-  // Get case name in Korean
+  // Get case name based on translation
   const getCaseLabel = caseId => {
     const caseItem = Object.values(WEIGHT_CASES).find(c => c.id === caseId);
-    return caseItem ? caseItem.label : '선택 안함';
+    return caseItem ? t(`weightCases.${caseId}`) : t('weightCases.none');
   };
 
   // New functions for colors:
@@ -281,9 +281,6 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        {/* Advertisement Banner - commented out as requested */}
-        {/* <Advertisement onUpgrade={handleUpgrade} /> */}
-
         {/* Calendar Section */}
         <View style={styles.calendarSection}>
           <WeightCalendar
@@ -300,9 +297,11 @@ const HomeScreen = () => {
             renderWeightCards()
           ) : !isSelectedDateInFuture() ? (
             <View style={styles.noDataContainer}>
-              <Text style={styles.noDataTitle}>추가된 체중 기록이 없어요</Text>
+              <Text style={styles.noDataTitle}>
+                {t('homeScreen.noDataTitle')}
+              </Text>
               <Text style={styles.noDataSubtitle}>
-                체중 기록을 추가해주세요
+                {t('homeScreen.noDataSubtitle')}
               </Text>
             </View>
           ) : null}
@@ -329,8 +328,6 @@ const HomeScreen = () => {
         activeOpacity={0.8}>
         <Icon name="plus" size={24} color="#ffffff" />
       </TouchableOpacity>
-
-      {/* Advertisement will be positioned here in future update */}
     </SafeAreaView>
   );
 };
