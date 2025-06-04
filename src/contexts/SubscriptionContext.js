@@ -6,7 +6,7 @@ import {Alert, Linking} from 'react-native';
 const API_KEY = 'appl_aosZhPWHrRMXlVGMYbutVUGHqPd';
 
 // Single product ID
-const PRODUCT_ID = 'weight_tracker_premium_monthly';
+const PRODUCT_ID = 'weight_tracker_monthly_subscription';
 
 const SubscriptionContext = createContext();
 
