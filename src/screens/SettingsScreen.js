@@ -30,7 +30,8 @@ const SettingsScreen = () => {
   const [isAppLockEnabled, setIsAppLockEnabled] = useState(false);
   const [isLanguageSelectorVisible, setIsLanguageSelectorVisible] =
     useState(false);
-  const {isSubscribed, loading, handlePurchase} = useSubscription();
+  const {isSubscribed, loading, handlePurchase, openSubscriptionManagement} =
+    useSubscription();
 
   useEffect(() => {
     if (height) setHeightInput(height.toString());
@@ -232,8 +233,16 @@ const SettingsScreen = () => {
                 ? t('settingsScreen.subscriptionActive')
                 : t('settingsScreen.subscriptionInactive')
             }
-            onPress={!isSubscribed ? handleSubscribePress : null}
+            onPress={!isSubscribed ? handlePurchase : null}
           />
+
+          {isSubscribed && (
+            <ListItem
+              icon="credit-card-settings-outline"
+              title={t('settingsScreen.manageSubscription')}
+              onPress={openSubscriptionManagement}
+            />
+          )}
 
           {/* Delete All Data */}
           <ListItem

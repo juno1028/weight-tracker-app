@@ -81,6 +81,7 @@
     "deleteError": "데이터 삭제에 실패했습니다.",
     "language": "언어 설정",
     "appVersion": "버전 1.0.0",
-    "saveSuccess": "신체 정보가 저장되었습니다."
+    "saveSuccess": "신체 정보가 저장되었습니다.",
+    "manageSubscription": "구독 관리"
   }
 }

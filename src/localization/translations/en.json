@@ -81,6 +81,7 @@
     "deleteError": "Failed to delete data.",
     "language": "Language Settings",
     "appVersion": "Version 1.0.0",
-    "saveSuccess": "Body information has been saved."
+    "saveSuccess": "Body information has been saved.",
+    "manageSubscription": "Manage Subscription"
   }
 }
