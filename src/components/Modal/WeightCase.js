@@ -1,9 +1,12 @@
 // src/components/Modal/WeightCase.js
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {WEIGHT_CASES} from './constants';
 
 const WeightCase = ({selectedCase, onSelectCase}) => {
+  const {t} = useTranslation();
+
   const getStyle = caseId => {
     switch (caseId) {
       case 'empty_stomach':
@@ -46,7 +49,7 @@ const WeightCase = ({selectedCase, onSelectCase}) => {
               onPress={() => onSelectCase(caseItem.id)}
               activeOpacity={0.7}>
               <Text style={[styles.buttonText, {color: caseStyle.textColor}]}>
-                {caseItem.label}
+                {t(`weightCases.${caseItem.id}`)}
               </Text>
             </TouchableOpacity>
           );

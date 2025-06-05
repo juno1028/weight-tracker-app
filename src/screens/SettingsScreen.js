@@ -223,7 +223,7 @@ const SettingsScreen = () => {
           />
 
           {/* Subscription Status */}
-          <ListItem
+          {/* <ListItem
             icon="crown"
             title={t('settingsScreen.subscription')}
             value={
@@ -242,7 +242,7 @@ const SettingsScreen = () => {
               title={t('settingsScreen.manageSubscription')}
               onPress={openSubscriptionManagement}
             />
-          )}
+          )} */}
 
           {/* Delete All Data */}
           <ListItem

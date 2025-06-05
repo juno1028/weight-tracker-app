@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {CalendarList} from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useTranslation} from 'react-i18next';
 import CustomDay from './CustomDay';
 import {WEIGHT_CASES} from './Modal/constants';
 
@@ -37,6 +38,7 @@ const WeightCalendar = ({
   onMonthChange,
   isSubscribed,
 }) => {
+  const {t} = useTranslation();
   // 모든 케이스를 기본적으로 활성화
   const [activeFilters, setActiveFilters] = useState(
     Object.values(WEIGHT_CASES).map(c => c.id),
@@ -63,7 +65,7 @@ const WeightCalendar = ({
       newDate.setMonth(newDate.getMonth() - 1);
 
       if (!isSubscribed && newDate < threeMonthsAgo) {
-        showSubscriptionAlert();
+        // showSubscriptionAlert();
         return;
       }
     } else {
@@ -79,18 +81,18 @@ const WeightCalendar = ({
     }
   };
 
-  const showSubscriptionAlert = () => {
-    Alert.alert(
-      '프리미엄 기능',
-      '3개월 이전의 데이터는 프리미엄 회원만 이용할 수 있습니다.',
-      [
-        {
-          text: '확인',
-          style: 'cancel',
-        },
-      ],
-    );
-  };
+  // const showSubscriptionAlert = () => {
+  //   Alert.alert(
+  //     '프리미엄 기능',
+  //     '3개월 이전의 데이터는 프리미엄 회원만 이용할 수 있습니다.',
+  //     [
+  //       {
+  //         text: '확인',
+  //         style: 'cancel',
+  //       },
+  //     ],
+  //   );
+  // };
 
   const toggleFilter = filterId => {
     setActiveFilters(prev => {
@@ -220,7 +222,7 @@ const WeightCalendar = ({
           threeMonthsAgo.setHours(0, 0, 0, 0);
 
           if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
-            showSubscriptionAlert();
+            // showSubscriptionAlert();
             return;
           }
 
@@ -245,7 +247,7 @@ const WeightCalendar = ({
               threeMonthsAgo.setHours(0, 0, 0, 0);
 
               if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
-                showSubscriptionAlert();
+                // showSubscriptionAlert();
                 return;
               }
 
@@ -293,7 +295,7 @@ const WeightCalendar = ({
             if (calendarRef.current && calendarRef.current.scrollToMonth) {
               calendarRef.current.scrollToMonth(allowedDate);
             }
-            showSubscriptionAlert();
+            // showSubscriptionAlert();
             return;
           }
 
@@ -329,7 +331,7 @@ const WeightCalendar = ({
                     styles.filterText,
                     {color: getTextColorForCase(caseItem.id)},
                   ]}>
-                  {caseItem.label}
+                  {t(`weightCases.${caseItem.id}`)}
                 </Text>
               </TouchableOpacity>
             );

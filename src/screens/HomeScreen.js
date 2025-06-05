@@ -85,10 +85,10 @@ const HomeScreen = () => {
     }
 
     // Check for 3-month restriction
-    if (isThreeMonthsRestricted()) {
-      showSubscriptionAlert();
-      return;
-    }
+    // if (isThreeMonthsRestricted()) {
+    //   showSubscriptionAlert();
+    //   return;
+    // }
 
     setEditingEntry(null);
     setInitialModalWeight(getInitialWeight());
@@ -105,10 +105,10 @@ const HomeScreen = () => {
 
   const handleEditPress = entry => {
     // Check for 3-month restriction
-    if (isThreeMonthsRestricted()) {
-      showSubscriptionAlert();
-      return;
-    }
+    // if (isThreeMonthsRestricted()) {
+    //   showSubscriptionAlert();
+    //   return;
+    // }
 
     setEditingEntry(entry);
     setInitialModalWeight(entry.weight);
@@ -174,26 +174,26 @@ const HomeScreen = () => {
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     threeMonthsAgo.setHours(0, 0, 0, 0);
 
-    if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
-      showSubscriptionAlert();
-      return;
-    }
+    // if (!isSubscribed && selectedDateTime < threeMonthsAgo) {
+    //   showSubscriptionAlert();
+    //   return;
+    // }
 
     setSelectedDate(selectedDate);
   };
 
-  const showSubscriptionAlert = () => {
-    Alert.alert(t('homeScreen.premium'), t('homeScreen.premiumRequired'), [
-      {
-        text: t('common.cancel'),
-        style: 'cancel',
-      },
-      {
-        text: t('homeScreen.upgrade'),
-        onPress: handlePurchase,
-      },
-    ]);
-  };
+  // const showSubscriptionAlert = () => {
+  //   Alert.alert(t('homeScreen.premium'), t('homeScreen.premiumRequired'), [
+  //     {
+  //       text: t('common.cancel'),
+  //       style: 'cancel',
+  //     },
+  //     {
+  //       text: t('homeScreen.upgrade'),
+  //       onPress: handlePurchase,
+  //     },
+  //   ]);
+  // };
 
   const handleUpgrade = () => {
     handlePurchase();

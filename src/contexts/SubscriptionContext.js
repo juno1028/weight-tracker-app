@@ -51,75 +51,127 @@ export const SubscriptionProvider = ({children}) => {
 
   const handlePurchase = async () => {
     try {
-      // configure 상태 한번 더 체크
+      console.log('=== PURCHASE DEBUG START ===');
+      console.log('Environment: TestFlight');
+      console.log('Product ID we are looking for:', PRODUCT_ID);
+
       if (!(await Purchases.isConfigured())) {
-        console.log('Purchases not configured, trying to configure...');
+        console.log('Purchases not configured, initializing...');
         await initializePurchases();
       }
 
       console.log('1. Getting offerings...');
       const offerings = await Purchases.getOfferings();
-      console.log('Offerings:', offerings);
+      console.log('All offerings:', Object.keys(offerings.all));
+      console.log('Current offering exists:', !!offerings.current);
 
-      // Try to find the product in the offerings
-      if (offerings.all[PRODUCT_ID] && offerings.all[PRODUCT_ID].monthly) {
-        // Use the offering approach
-        console.log('Found product in offerings:', offerings.all[PRODUCT_ID]);
-        const packageToPurchase = offerings.all[PRODUCT_ID].monthly;
-
-        console.log('2. Using package:', packageToPurchase);
-        const {customerInfo} = await Purchases.purchasePackage(
-          packageToPurchase,
-        );
-
-        console.log('3. Purchase successful:', customerInfo);
-        setIsSubscribed(true);
-        return true;
-      } else {
-        // Fall back to direct product purchase
+      if (offerings.current) {
         console.log(
-          'Product not found in offerings, trying direct product purchase',
+          'Current offering packages:',
+          Object.keys(offerings.current.availablePackages || {}),
+        );
+        console.log('Monthly package exists:', !!offerings.current.monthly);
+      }
+
+      // Method 1: Try current offering
+      if (offerings.current && offerings.current.monthly) {
+        console.log('2. Found monthly package in current offering');
+        console.log(
+          'Package product ID:',
+          offerings.current.monthly.product.identifier,
         );
 
-        const products = await Purchases.getProducts([PRODUCT_ID]);
-        console.log('Available products:', products);
+        const {customerInfo} = await Purchases.purchasePackage(
+          offerings.current.monthly,
+        );
+        console.log('3. Purchase successful via offering');
 
-        if (products && products.length > 0) {
-          console.log(
-            '4. Purchasing product directly:',
-            products[0].identifier,
-          );
-          const {customerInfo} = await Purchases.purchaseProduct(
-            products[0].identifier,
-          );
+        const isPro = customerInfo.entitlements.active['pro'] !== undefined;
+        console.log('Pro entitlement active:', isPro);
+        setIsSubscribed(isPro);
+        return true;
+      }
 
-          console.log('5. Purchase successful:', customerInfo);
-          setIsSubscribed(true);
-          return true;
-        } else {
-          console.log('No products found');
-          Alert.alert(
-            '구독 오류',
-            '구독 상품을 찾을 수 없습니다. 나중에 다시 시도해주세요.',
-            [{text: '확인'}],
-          );
-          return false;
+      // Method 2: Check all offerings for our product
+      console.log('2. Checking all offerings for our product...');
+      let foundOffering = null;
+      for (const [offeringId, offering] of Object.entries(offerings.all)) {
+        console.log(`Checking offering: ${offeringId}`);
+        if (
+          offering.monthly &&
+          offering.monthly.product.identifier === PRODUCT_ID
+        ) {
+          console.log(`Found our product in offering: ${offeringId}`);
+          foundOffering = offering;
+          break;
         }
       }
-    } catch (error) {
-      if (!error.userCancelled) {
-        console.error('Purchase error details:', {
-          code: error.code,
-          message: error.message,
-          underlyingError: error.underlyingError,
-        });
 
-        Alert.alert(
-          '구독 오류',
-          '구독 처리 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
-          [{text: '확인'}],
+      if (foundOffering) {
+        console.log('3. Purchasing via found offering');
+        const {customerInfo} = await Purchases.purchasePackage(
+          foundOffering.monthly,
         );
+        console.log('4. Purchase successful via found offering');
+
+        const isPro = customerInfo.entitlements.active['pro'] !== undefined;
+        setIsSubscribed(isPro);
+        return true;
       }
+
+      // Method 3: Direct product purchase
+      console.log('3. No offerings found, trying direct product purchase');
+      const products = await Purchases.getProducts([PRODUCT_ID]);
+      console.log(
+        'Available products:',
+        products.map(p => ({
+          identifier: p.identifier,
+          price: p.price,
+          title: p.title,
+        })),
+      );
+
+      if (products && products.length > 0) {
+        console.log('4. Found product, attempting direct purchase');
+        const {customerInfo} = await Purchases.purchaseProduct(PRODUCT_ID);
+        console.log('5. Purchase successful via direct product');
+
+        const isPro = customerInfo.entitlements.active['pro'] !== undefined;
+        setIsSubscribed(isPro);
+        return true;
+      }
+
+      console.log('ERROR: No products found');
+      Alert.alert(
+        '구독 오류',
+        '구독 상품을 찾을 수 없습니다. RevenueCat 설정을 확인해주세요.',
+        [{text: '확인'}],
+      );
+      return false;
+    } catch (error) {
+      console.log('=== PURCHASE ERROR ===');
+      console.log('Error code:', error.code);
+      console.log('Error message:', error.message);
+      console.log('Error details:', JSON.stringify(error, null, 2));
+      console.log('User cancelled:', error.userCancelled);
+
+      if (error.userCancelled) {
+        return false;
+      }
+
+      // More specific error handling
+      let errorMessage = '구독 처리 중 오류가 발생했습니다.';
+
+      if (error.code === 'PRODUCT_NOT_AVAILABLE_FOR_PURCHASE') {
+        errorMessage =
+          '구독 상품이 현재 구매할 수 없습니다. App Store Connect에서 상품이 승인되었는지 확인해주세요.';
+      } else if (error.code === 'PURCHASES_NOT_CONFIGURED') {
+        errorMessage = 'RevenueCat이 올바르게 설정되지 않았습니다.';
+      } else if (error.message) {
+        errorMessage = `오류: ${error.message}`;
+      }
+
+      Alert.alert('구독 오류', errorMessage, [{text: '확인'}]);
       return false;
     }
   };

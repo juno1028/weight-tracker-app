@@ -339,11 +339,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 8,
+    paddingHorizontal: 4,
+    minHeight: 24, // Add minimum height for two lines
   },
   gaugeLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
     textAlign: 'center',
+    flex: 1,
+    paddingHorizontal: 1,
+    lineHeight: 12, // Tight line height for compact text
   },
   infoItem: {
     flex: 1,
