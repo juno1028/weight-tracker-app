@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
   SafeAreaView,
+  Linking,
   Switch,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +33,11 @@ const SettingsScreen = () => {
     useState(false);
   const {isSubscribed, loading, handlePurchase, openSubscriptionManagement} =
     useSubscription();
+
+  const TERMS_URL =
+    'https://juno1028.github.io/weight-tracker-legal/terms.html';
+  const PRIVACY_URL =
+    'https://juno1028.github.io/weight-tracker-legal/privacy.html';
 
   useEffect(() => {
     if (height) setHeightInput(height.toString());
@@ -249,6 +255,21 @@ const SettingsScreen = () => {
             icon="trash-can"
             title={t('settingsScreen.deleteData')}
             onPress={handleDeleteAllData}
+          />
+
+          {/* Legal Information Section */}
+          <View style={styles.sectionSeparator} />
+
+          <ListItem
+            icon="file-document-outline"
+            title="Terms of Use"
+            onPress={() => Linking.openURL(TERMS_URL)}
+          />
+
+          <ListItem
+            icon="shield-check"
+            title="Privacy Policy"
+            onPress={() => Linking.openURL(PRIVACY_URL)}
           />
         </View>
 
