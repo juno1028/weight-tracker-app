@@ -1,4 +1,4 @@
-// Updated App.js with splash screen integration
+// Updated App.js with RevenueCat initialization on app start
 import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -6,8 +6,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {I18nextProvider, useTranslation} from 'react-i18next';
 import setupI18n from './src/localization/i18n';
-import {View, ActivityIndicator, Text, Image, StyleSheet} from 'react-native';
-import SplashScreen from 'react-native-splash-screen'; // Add this import
+import {View, ActivityIndicator, Text, StyleSheet} from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
 
 import HomeScreen from './src/screens/HomeScreen';
 import BMIScreen from './src/screens/BMIScreen';
@@ -15,7 +15,10 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import {WeightProvider} from './src/contexts/WeightContext';
 import {SettingsProvider} from './src/contexts/SettingsContext';
 import {UserProvider} from './src/contexts/UserContext';
-import {SubscriptionProvider} from './src/contexts/SubscriptionContext';
+import {
+  SubscriptionProvider,
+  useSubscription,
+} from './src/contexts/SubscriptionContext';
 import InitialSetupModal from './src/components/InitialSetupModal';
 
 const Tab = createBottomTabNavigator();
@@ -89,20 +92,35 @@ const AppWrapper = () => {
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Get initializePurchases from SubscriptionContext
+  const {initializePurchases} = useSubscription();
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        console.log('Starting app initialization...');
+
         // Initialize i18n
+        console.log('Initializing i18n...');
         const i18nInstance = await setupI18n();
         setI18n(i18nInstance);
+        console.log('i18n initialized successfully');
+
+        // Initialize RevenueCat early
+        console.log('Initializing RevenueCat...');
+        await initializePurchases();
+        console.log('RevenueCat initialized successfully');
 
         // Check if it's first launch
+        console.log('Checking first launch status...');
         const value = await AsyncStorage.getItem('isFirstLaunch');
         setIsFirstLaunch(value === null || value === 'true');
+        console.log('First launch check completed');
       } catch (error) {
         console.error('Failed to initialize app:', error);
       } finally {
         setIsLoading(false);
+        console.log('App initialization completed');
 
         // Hide the native splash screen after our JS has loaded
         if (SplashScreen) {
@@ -112,7 +130,7 @@ const AppWrapper = () => {
     };
 
     initializeApp();
-  }, []);
+  }, [initializePurchases]);
 
   // Handle initial setup completion
   const handleInitialSetupComplete = weight => {

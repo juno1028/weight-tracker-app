@@ -1,16 +1,41 @@
 {
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
   "identifier" : "5D473B73",
-  "nonRenewingSubscriptions" : [],
-  "products" : [],
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA"
+  },
   "subscriptionGroups" : [
     {
       "id" : "21630857",
-      "localizations" : [],
+      "localizations" : [
+
+      ],
       "name" : "WeightTracker Pro",
       "subscriptions" : [
         {
-          "adHocOffers" : [],
-          "codeOffers" : [],
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
           "displayPrice" : "0.99",
           "familyShareable" : false,
           "groupNumber" : 1,
@@ -32,7 +57,10 @@
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Weight Tracker Premium Monthly",
           "subscriptionGroupID" : "21630857",
-          "type" : "RecurringSubscription"
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
         }
       ]
     }

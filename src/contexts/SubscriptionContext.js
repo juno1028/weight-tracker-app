@@ -5,7 +5,7 @@ import {Alert, Linking} from 'react-native';
 // iOS-specific API key
 const API_KEY = 'appl_aosZhPWHrRMXlVGMYbutVUGHqPd';
 
-// Single product ID
+// Subscription product ID
 const PRODUCT_ID = 'weight_tracker_monthly_subscription';
 
 const SubscriptionContext = createContext();
@@ -13,6 +13,7 @@ const SubscriptionContext = createContext();
 export const SubscriptionProvider = ({children}) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(false);
 
   const checkSubscriptionStatus = useCallback(async () => {
     try {
@@ -21,11 +22,16 @@ export const SubscriptionProvider = ({children}) => {
 
       // Check if the 'pro' entitlement is active
       const isPro = customerInfo.entitlements.active['pro'] !== undefined;
-      console.log('Is Pro:', isPro);
+      console.log('Is Pro (entitlement active):', isPro);
 
-      setIsSubscribed(customerInfo.activeSubscriptions.length > 0);
+      // Also check active subscriptions as backup
+      const hasActiveSubscription = customerInfo.activeSubscriptions.length > 0;
+      console.log('Has active subscription:', hasActiveSubscription);
+
+      setIsSubscribed(isPro || hasActiveSubscription);
     } catch (error) {
       console.error('Failed to get customer info:', error);
+      setIsSubscribed(false);
     }
   }, []);
 
@@ -34,30 +40,56 @@ export const SubscriptionProvider = ({children}) => {
       console.log('Configuring Purchases with API key:', API_KEY);
       await Purchases.configure({
         apiKey: API_KEY,
-        debugLogsEnabled: true,
+        debugLogsEnabled: __DEV__,
       });
       console.log('Purchases configured successfully');
 
-      // 설정 확인
-      console.log('Checking if configured:', await Purchases.isConfigured());
+      // Verify configuration
+      const isConfigured = await Purchases.isConfigured();
+      console.log('Purchases configuration verified:', isConfigured);
 
+      if (!isConfigured) {
+        throw new Error('RevenueCat configuration failed');
+      }
+
+      // Check subscription status after configuration
       await checkSubscriptionStatus();
     } catch (error) {
       console.error('Failed to configure purchases:', error);
+      setIsSubscribed(false);
     } finally {
       setLoading(false);
     }
   }, [checkSubscriptionStatus]);
 
   const handlePurchase = async () => {
+    if (purchasing) {
+      console.log('Purchase already in progress, ignoring...');
+      return false;
+    }
+
+    setPurchasing(true);
+
     try {
       console.log('=== PURCHASE DEBUG START ===');
-      console.log('Environment: TestFlight');
+      console.log('Environment: Production/TestFlight');
       console.log('Product ID we are looking for:', PRODUCT_ID);
 
-      if (!(await Purchases.isConfigured())) {
+      // RevenueCat should already be configured from app initialization
+      const isConfigured = await Purchases.isConfigured();
+      console.log('Purchases configured status:', isConfigured);
+
+      if (!isConfigured) {
         console.log('Purchases not configured, initializing...');
         await initializePurchases();
+
+        // Add small delay to ensure initialization is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Double-check configuration
+        if (!(await Purchases.isConfigured())) {
+          throw new Error('Failed to configure RevenueCat');
+        }
       }
 
       console.log('1. Getting offerings...');
@@ -89,6 +121,7 @@ export const SubscriptionProvider = ({children}) => {
         const isPro = customerInfo.entitlements.active['pro'] !== undefined;
         console.log('Pro entitlement active:', isPro);
         setIsSubscribed(isPro);
+        console.log('=== PURCHASE DEBUG END (SUCCESS) ===');
         return true;
       }
 
@@ -116,6 +149,7 @@ export const SubscriptionProvider = ({children}) => {
 
         const isPro = customerInfo.entitlements.active['pro'] !== undefined;
         setIsSubscribed(isPro);
+        console.log('=== PURCHASE DEBUG END (SUCCESS) ===');
         return true;
       }
 
@@ -138,6 +172,7 @@ export const SubscriptionProvider = ({children}) => {
 
         const isPro = customerInfo.entitlements.active['pro'] !== undefined;
         setIsSubscribed(isPro);
+        console.log('=== PURCHASE DEBUG END (SUCCESS) ===');
         return true;
       }
 
@@ -147,6 +182,7 @@ export const SubscriptionProvider = ({children}) => {
         '구독 상품을 찾을 수 없습니다. RevenueCat 설정을 확인해주세요.',
         [{text: '확인'}],
       );
+      console.log('=== PURCHASE DEBUG END (FAIL) ===');
       return false;
     } catch (error) {
       console.log('=== PURCHASE ERROR ===');
@@ -156,6 +192,7 @@ export const SubscriptionProvider = ({children}) => {
       console.log('User cancelled:', error.userCancelled);
 
       if (error.userCancelled) {
+        console.log('Purchase cancelled by user');
         return false;
       }
 
@@ -167,60 +204,51 @@ export const SubscriptionProvider = ({children}) => {
           '구독 상품이 현재 구매할 수 없습니다. App Store Connect에서 상품이 승인되었는지 확인해주세요.';
       } else if (error.code === 'PURCHASES_NOT_CONFIGURED') {
         errorMessage = 'RevenueCat이 올바르게 설정되지 않았습니다.';
+      } else if (error.code === 'CONFIGURATION_ERROR') {
+        errorMessage =
+          'RevenueCat 설정에 문제가 있습니다. 잠시 후 다시 시도해주세요.';
       } else if (error.message) {
         errorMessage = `오류: ${error.message}`;
       }
 
       Alert.alert('구독 오류', errorMessage, [{text: '확인'}]);
+      console.log('=== PURCHASE DEBUG END (ERROR) ===');
       return false;
+    } finally {
+      setPurchasing(false);
     }
   };
 
-  // Add function to manage subscriptions (iOS only)
   const openSubscriptionManagement = async () => {
     try {
-      if (!(await Purchases.isConfigured())) {
+      const isConfigured = await Purchases.isConfigured();
+      if (!isConfigured) {
         await initializePurchases();
       }
 
-      // Get customer info to check subscription status
       const customerInfo = await Purchases.getCustomerInfo();
 
-      // Check if there's an active subscription
       if (
         customerInfo.activeSubscriptions &&
         customerInfo.activeSubscriptions.length > 0
       ) {
-        // Try to open native subscription management UI
         await Purchases.showManageSubscriptions();
       } else {
-        // When there's no active subscription
         Alert.alert('구독 정보', '현재 활성화된 구독이 없습니다.', [
           {text: '확인'},
         ]);
       }
 
-      // After returning, refresh the subscription status
+      // Refresh subscription status after management
       await checkSubscriptionStatus();
     } catch (error) {
       console.error('Failed to open subscription management:', error);
-
-      // Guide users to the Settings app as an alternative
       Alert.alert(
         '설정 안내',
         '구독 관리 페이지를 열 수 없습니다. iOS 설정 앱 > Apple ID > 구독에서 관리할 수 있습니다.',
         [
-          {
-            text: '취소',
-            style: 'cancel',
-          },
-          {
-            text: '설정 열기',
-            onPress: () => {
-              // Open iOS Settings app
-              Linking.openURL('app-settings:');
-            },
-          },
+          {text: '취소', style: 'cancel'},
+          {text: '설정 열기', onPress: () => Linking.openURL('app-settings:')},
         ],
       );
     }
@@ -231,9 +259,11 @@ export const SubscriptionProvider = ({children}) => {
       value={{
         isSubscribed,
         loading,
+        purchasing,
         handlePurchase,
         checkSubscriptionStatus,
         openSubscriptionManagement,
+        initializePurchases,
       }}>
       {children}
     </SubscriptionContext.Provider>

@@ -28,16 +28,22 @@ const SettingsScreen = () => {
   const [isProfileEditMode, setIsProfileEditMode] = useState(false);
   const [heightInput, setHeightInput] = useState('');
   const [weightInput, setWeightInput] = useState('');
-  const [isAppLockEnabled, setIsAppLockEnabled] = useState(false);
   const [isLanguageSelectorVisible, setIsLanguageSelectorVisible] =
     useState(false);
-  const {isSubscribed, loading, handlePurchase, openSubscriptionManagement} =
-    useSubscription();
+
+  // Get subscription state including purchasing status
+  const {
+    isSubscribed,
+    loading,
+    purchasing,
+    handlePurchase,
+    openSubscriptionManagement,
+  } = useSubscription();
 
   const TERMS_URL =
-    'https://juno1028.github.io/weight-tracker-legal/terms.html';
+    'https://yourusername.github.io/weight-tracker-legal/terms.html';
   const PRIVACY_URL =
-    'https://juno1028.github.io/weight-tracker-legal/privacy.html';
+    'https://yourusername.github.io/weight-tracker-legal/privacy.html';
 
   useEffect(() => {
     if (height) setHeightInput(height.toString());
@@ -111,13 +117,17 @@ const SettingsScreen = () => {
   };
 
   const handleSubscribePress = async () => {
+    if (purchasing) {
+      // Already processing, ignore
+      return;
+    }
+
     if (!isSubscribed) {
       const success = await handlePurchase();
       if (success) {
-        Alert.alert(t('common.success'), t('subscriptionSuccess'));
-      } else {
-        Alert.alert(t('common.error'), t('subscriptionError'));
+        Alert.alert(t('common.success'), '구독이 활성화되었습니다.');
       }
+      // Error handling is done in the subscription context
     }
   };
 
@@ -228,27 +238,29 @@ const SettingsScreen = () => {
             onPress={() => setIsLanguageSelectorVisible(true)}
           />
 
-          {/* Subscription Status */}
-          {/* <ListItem
+          {/* Subscription Status - Currently Commented Out */}
+
+          <ListItem
             icon="crown"
             title={t('settingsScreen.subscription')}
             value={
               loading
                 ? t('common.loading')
+                : purchasing
+                ? '처리 중...'
                 : isSubscribed
                 ? t('settingsScreen.subscriptionActive')
                 : t('settingsScreen.subscriptionInactive')
             }
-            onPress={!isSubscribed ? handlePurchase : null}
+            onPress={!isSubscribed && !purchasing ? handleSubscribePress : null}
+            rightElement={
+              purchasing ? (
+                <View style={styles.purchasingIndicator}>
+                  <Text style={styles.purchasingText}>처리 중...</Text>
+                </View>
+              ) : null
+            }
           />
-
-          {isSubscribed && (
-            <ListItem
-              icon="credit-card-settings-outline"
-              title={t('settingsScreen.manageSubscription')}
-              onPress={openSubscriptionManagement}
-            />
-          )} */}
 
           {/* Delete All Data */}
           <ListItem
@@ -414,6 +426,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'System',
+  },
+  sectionSeparator: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 16,
+  },
+  purchasingIndicator: {
+    backgroundColor: '#FF9500',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  purchasingText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
   footer: {
     alignItems: 'center',
