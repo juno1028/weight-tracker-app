@@ -41,9 +41,9 @@ const SettingsScreen = () => {
   } = useSubscription();
 
   const TERMS_URL =
-    'https://yourusername.github.io/weight-tracker-legal/terms.html';
+    'https://juno1028.github.io/weight-tracker-legal/terms.html';
   const PRIVACY_URL =
-    'https://yourusername.github.io/weight-tracker-legal/privacy.html';
+    'https://juno1028.github.io/weight-tracker-legal/privacy.html';
 
   useEffect(() => {
     if (height) setHeightInput(height.toString());
